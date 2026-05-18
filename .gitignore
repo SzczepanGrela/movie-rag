@@ -1,10 +1,22 @@
 # Default-deny markdown — every .md must be consciously allowlisted below.
 **/*.md
+**/*.txt
 !README.md
 !docs/roadmap.md
+
 
 # Secrets
 .env
 .env.local
 .env.*.local
 !.env.template
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
