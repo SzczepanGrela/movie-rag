@@ -1,5 +1,6 @@
 # Default-deny markdown — every .md must be consciously allowlisted below.
 **/*.md
+!docs/roadmap.md
 
 # Secrets
 .env
