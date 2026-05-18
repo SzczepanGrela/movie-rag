@@ -1,0 +1,8 @@
+# Default-deny markdown — every .md must be consciously allowlisted below.
+**/*.md
+
+# Secrets
+.env
+.env.local
+.env.*.local
+!.env.template
