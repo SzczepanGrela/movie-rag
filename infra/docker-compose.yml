@@ -1,0 +1,23 @@
+name: movierag
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: movierag-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    # TODO M1.5: move `ports:` to docker-compose.override.yml (dev-only) and stop publishing in production (NPM + dedicated network).
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - movierag_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  movierag_db_data:
