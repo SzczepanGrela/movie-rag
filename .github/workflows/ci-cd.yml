@@ -63,14 +63,14 @@ jobs:
         run: uv sync --frozen
       - name: Start Postgres via docker compose
         working-directory: infra
-        run: docker compose -f docker-compose.yml up -d --wait db
+        run: docker compose up -d --wait db
       - name: Run pytest
         working-directory: backend
         run: uv run pytest
       - name: Dump compose logs on failure
         if: failure()
         working-directory: infra
-        run: docker compose -f docker-compose.yml logs db
+        run: docker compose logs db
 
   smoke-build:
     name: Smoke build image
