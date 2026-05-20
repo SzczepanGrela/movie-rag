@@ -50,3 +50,8 @@ services:
 
 volumes:
   movierag_db_data:
+
+networks:
+  default:
+    name: movierag_network
+    external: true

@@ -61,6 +61,8 @@ jobs:
       - name: Install backend dependencies
         working-directory: backend
         run: uv sync --frozen
+      - name: Create external network (no-op if exists)
+        run: docker network create movierag_network 2>/dev/null || true
       - name: Start Postgres via docker compose
         working-directory: infra
         run: docker compose up -d --wait db
