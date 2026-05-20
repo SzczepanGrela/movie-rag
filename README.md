@@ -4,7 +4,13 @@
 
 Ask in plain English what you want to watch and get matching movies back — described by their actual plot, scenes, and atmosphere, not just genre tags.
 
-> **Status:** design complete, implementation in progress. The first working iteration is being built. See [`docs/roadmap.md`](docs/roadmap.md) for milestone progress.
+> **Status:** M1.5 complete — backend deployed in production with auto-deploy CI/CD. Working toward v1; ETL (M2) next. See [`docs/roadmap.md`](docs/roadmap.md) for milestone progress.
+
+[![CI/CD](https://github.com/SzczepanGrela/movie-rag/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/SzczepanGrela/movie-rag/actions)
+[![Status](https://img.shields.io/website?down_color=red&down_message=down&label=movierag.grela.dev&up_color=brightgreen&up_message=up&url=https%3A%2F%2Fmovierag.grela.dev%2Fhealth)](https://stats.uptimerobot.com/XXQ6MTQxVH)
+
+🌐 **Live:** [`https://movierag.grela.dev/health`](https://movierag.grela.dev/health) — `/health` is currently the only public endpoint; full v1 endpoints arrive milestone by milestone
+📊 **Uptime:** [public status page](https://stats.uptimerobot.com/XXQ6MTQxVH)
 
 ---
 
@@ -101,7 +107,9 @@ The implementation roadmap is in [`docs/roadmap.md`](docs/roadmap.md). Detailed 
 | Phase | Status | What |
 |---|---|---|
 | **Design** | ✅ done | Full spec + 8-milestone roadmap |
-| **v1: M1-M8** | 🔨 in progress | TMDb + Wikipedia + Gemini pipeline, end-to-end working app, deployed |
+| **M1: backend skeleton** | ✅ done | uv + FastAPI + async SQLAlchemy + pgvector + Docker + CI (ruff, mypy strict, pytest) |
+| **M1.5: production deploy** | ✅ done | Auto-deploy from `main` → `movierag.grela.dev`; Cloudflare + NPM + Tailscale OAuth + GHCR |
+| **M2-M8 (v1)** | 🔨 in progress | ETL ingestion → retrieval → frontend → AI streaming, end-to-end working app |
 | **v2** | ⏳ planned | MAD (Movie Audio Descriptions) augmentation — 650 films enriched with professional audio descriptions |
 | **v3** | 💭 idea | Subtitle → scene pipeline (if MAD proves insufficient) |
 
@@ -120,26 +128,59 @@ The codebase will evolve in public; design decisions and trade-offs are document
 
 ```
 movie-rag/
-├── backend/          FastAPI app, retrieval logic
-├── frontend/         Vite + React app
-├── etl/              One-shot scripts: TMDb fetch, Wikipedia fetch,
-│                     Gemini generate, image pipeline, embedding load
+├── backend/                          FastAPI app, retrieval logic (in progress)
+│   ├── app/                          Application code
+│   ├── tests/                        Pytest integration tests
+│   ├── Dockerfile                    Single-stage image (slim + uv)
+│   └── pyproject.toml                Deps, ruff/mypy/pytest config
+├── etl/                              One-shot scripts (M2+): TMDb / Wikipedia /
+│                                     Gemini / images / embeddings
+├── frontend/                         Vite + React app (M5+)
 ├── infra/
-│   ├── deploy/       deploy.sh, deploy-launcher.sh
-│   └── docker-compose.yml
+│   ├── deploy/                       VPS deploy scripts (self-updating)
+│   ├── docker-compose.yml            Production base — GHCR image, healthcheck
+│   └── docker-compose.override.yml   Dev override — local build + host ports
 ├── docs/
-│   ├── roadmap.md    Milestone roadmap
-│   └── superpowers/
-│       └── specs/    Design specs
+│   └── roadmap.md                    Milestone roadmap (canonical scope)
 └── .github/
-    └── workflows/    CI/CD pipelines
+    └── workflows/
+        └── ci-cd.yml                 Lint + typecheck + test + build-push + deploy
 ```
 
 *(Structure being built out per milestone — current state may not yet contain all of these.)*
 
 ## Running locally
 
-Setup instructions will be added once Milestone 1 (Repo skeleton + backend baseline) is complete. Watch this space.
+Prerequisites: Docker + Docker Compose, [`uv`](https://docs.astral.sh/uv/) for the Python side.
+
+```bash
+git clone https://github.com/SzczepanGrela/movie-rag.git
+cd movie-rag
+
+# local dev secrets — POSTGRES_PASSWORD is whatever you want
+cp infra/.env.template infra/.env
+# edit infra/.env
+
+# external network is declared in compose; create it once locally
+docker network create movierag_network
+
+# start the stack (db + api)
+cd infra
+docker compose up -d --build
+
+curl localhost:8000/health
+# → {"status":"ok","db":"ok"}
+```
+
+Tests run directly via `uv`:
+
+```bash
+cd backend
+uv sync
+uv run pytest        # integration smoke against compose db
+uv run ruff check .  # lint
+uv run mypy          # strict type check
+```
 
 ## License
 

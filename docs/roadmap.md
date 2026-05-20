@@ -52,7 +52,7 @@ The detailed design (architecture, schemas, prompts, infrastructure decisions) w
 
 ## Milestone 1.5 — Production walking skeleton (CI/CD + deploy)
 
-**Goal:** The hello-world FastAPI from M1 is **in production** at `movie-rag.grela.dev`. Push to main = auto-deploy. From this point on, every subsequent milestone ends with a real deploy.
+**Goal:** The hello-world FastAPI from M1 is **in production** at `movierag.grela.dev`. Push to main = auto-deploy. From this point on, every subsequent milestone ends with a real deploy.
 
 **Why a separate milestone:** everything below is operational infrastructure work (Cloudflare, NPM, Tailscale, VPS user setup). The author is already familiar with the pattern from a prior project, so the learning value for the code itself is low. But the portfolio value is high: a recruiter sees a functioning pipeline from the first deployment. Separating it from M1 keeps M1 clean (one session for backend skeleton) and M8 clean (polish, not infra).
 
@@ -70,13 +70,13 @@ Tailscale (once):
 - Tag `tag:ci-vps` permits CI access to the VPS
 
 Cloudflare (once):
-- DNS A record `movie-rag.grela.dev` → VPS public IP, proxied (orange cloud)
+- DNS A record `movierag.grela.dev` → VPS public IP, proxied (orange cloud)
 - SSL/TLS mode: **Full (strict)**
-- Origin cert generated for `movie-rag.grela.dev` (or `*.grela.dev`), 15-year validity
+- Origin cert generated for `movierag.grela.dev` (or `*.grela.dev`), 15-year validity
 - Cache rules: `/api/*` bypass, statics standard (initial config — details extended when frontend joins in M6)
 
 Nginx Proxy Manager (once, via UI):
-- Proxy Host: `movie-rag.grela.dev` → `api:8000` (docker network alias)
+- Proxy Host: `movierag.grela.dev` → `api:8000` (docker network alias)
 - SSL: installed Cloudflare origin cert
 - Custom location for `/api/explain`: `proxy_buffering off`, `proxy_read_timeout 300s` (prepares for SSE in M7 — works from day one even before the endpoint exists)
 - NPM attached to docker network `movie-rag_default`
@@ -98,10 +98,10 @@ GitHub Secrets set (via `gh secret set`):
 - `VPS_HOST`, `VPS_SSH_PORT`
 
 Monitoring:
-- UptimeRobot signup + monitor `https://movie-rag.grela.dev/health` every 5 min, email alert
+- UptimeRobot signup + monitor `https://movierag.grela.dev/health` every 5 min, email alert
 
 **Acceptance:**
-- `curl https://movie-rag.grela.dev/health` returns 200 OK with DB ping (through Cloudflare → NPM → FastAPI container on VPS)
+- `curl https://movierag.grela.dev/health` returns 200 OK with DB ping (through Cloudflare → NPM → FastAPI container on VPS)
 - Push to main → GitHub Actions green → deploy job finishes with health check pass
 - UptimeRobot green for 24h after first deploy
 - Image in GHCR: `ghcr.io/szczepangrela/movie-rag:latest` + SHA tag, visible in `Packages` on the profile
@@ -358,7 +358,7 @@ Monitoring:
 
 **Deliverables:**
 - `frontend/src/routes/about.tsx` — final AboutPage content: project description, how the retrieval pipeline works, tech stack with links, **architecture diagram** (SVG export from draw.io or inline Mermaid)
-- README final: production demo link `https://movie-rag.grela.dev`, screenshots / animated GIF of search flow, real "Running locally" section, architecture overview
+- README final: production demo link `https://movierag.grela.dev`, screenshots / animated GIF of search flow, real "Running locally" section, architecture overview
 - `backend/Dockerfile` upgraded to **multi-stage** (if not done in M6 with the frontend): bun build frontend → python copy to `/static` → pre-download AI models in the image layer (faster cold start on VPS)
 - Cloudflare cache rules final for frontend statics (`/static/assets/*` immutable 1y, once frontend assets are present)
 - Backup script `/opt/movie-rag-backup/backup-db.sh` + cron daily (`0 3 * * *`), retention 7 days (`find -mtime +7 -delete`)
