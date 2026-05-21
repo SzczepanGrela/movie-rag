@@ -66,6 +66,9 @@ jobs:
       - name: Start Postgres via docker compose
         working-directory: infra
         run: docker compose up -d --wait db
+      - name: Run migrations
+        working-directory: backend
+        run: uv run alembic upgrade head
       - name: Run pytest
         working-directory: backend
         run: uv run pytest

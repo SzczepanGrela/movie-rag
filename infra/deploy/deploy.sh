@@ -9,6 +9,7 @@ cd /home/movie-rag
 curl -fsSL https://raw.githubusercontent.com/SzczepanGrela/movie-rag/main/infra/docker-compose.yml -o docker-compose.yml
 
 docker compose pull
+docker compose run --rm api alembic upgrade head
 docker compose up -d --remove-orphans
 docker restart nginx-proxy-manager || true
 docker image prune -f
