@@ -6,6 +6,7 @@ from lib.config import EtlSettings
 @pytest.fixture
 def etl_settings() -> EtlSettings:
     return EtlSettings(
+        database_url="postgresql+asyncpg://test:test@localhost/test",
         tmdb_api_token="test-token",
         tmdb_rate_max_requests=1000,
         tmdb_rate_period_s=0.001,

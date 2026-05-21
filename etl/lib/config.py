@@ -6,6 +6,7 @@ _ENV_FILE = Path(__file__).resolve().parents[2] / "infra" / ".env"
 
 
 class EtlSettings(BaseSettings):
+    database_url: str
     tmdb_api_token: str
     tmdb_base_url: str = "https://api.themoviedb.org/3"
     tmdb_rate_max_requests: int = 40
