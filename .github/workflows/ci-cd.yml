@@ -77,6 +77,23 @@ jobs:
         working-directory: infra
         run: docker compose logs db
 
+  etl:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: etl
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: etl/uv.lock
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      - run: uv run pytest
+
   smoke-build:
     name: Smoke build image
     if: github.event_name == 'pull_request'
@@ -94,7 +111,7 @@ jobs:
 
   build-push:
     name: Build and push image to GHCR
-    needs: [lint, type-check, test]
+    needs: [lint, type-check, test, etl]
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
