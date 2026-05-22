@@ -22,6 +22,19 @@ async def test_get_movie_sends_bearer_and_credits_param(etl_settings: EtlSetting
     assert request.headers["authorization"] == "Bearer test-token"
 
 
+async def test_get_movie_omits_credits_param_when_disabled(etl_settings: EtlSettings) -> None:
+    captured: dict[str, httpx.Request] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["request"] = request
+        return httpx.Response(200, json={"id": 550, "title": "Fight Club"})
+
+    async with TmdbClient(etl_settings, transport=httpx.MockTransport(handler)) as client:
+        await client.get_movie(550, append_credits=False)
+
+    assert "append_to_response" not in captured["request"].url.params
+
+
 async def test_get_movie_retries_on_503_then_succeeds(etl_settings: EtlSettings) -> None:
     calls = {"n": 0}
 

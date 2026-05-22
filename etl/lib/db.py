@@ -70,7 +70,7 @@ async def pg_upsert(
 
 async def pg_insert_ignore(
     session: AsyncSession,
-    table: Table,
+    target: type[DeclarativeBase] | Table,
     rows: Sequence[dict[str, Any]],
     conflict_cols: Sequence[str],
     chunk_size: int = 500,
@@ -81,7 +81,7 @@ async def pg_insert_ignore(
     total = 0
     for offset in range(0, len(rows), chunk_size):
         chunk = list(rows[offset : offset + chunk_size])
-        stmt = insert(table).values(chunk)
+        stmt = insert(target).values(chunk)
         stmt = stmt.on_conflict_do_nothing(index_elements=list(conflict_cols))
         await session.execute(stmt)
         total += len(chunk)
