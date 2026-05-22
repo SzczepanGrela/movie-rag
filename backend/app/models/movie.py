@@ -8,6 +8,7 @@ from app.models.base import Base
 from app.models.genre import movie_genres
 
 if TYPE_CHECKING:
+    from app.models.chunk import Chunk
     from app.models.credits import MovieCast, MovieCrew
     from app.models.genre import Genre
     from app.models.source_text import SourceText
@@ -43,5 +44,8 @@ class Movie(Base):
         back_populates="movie", cascade="all, delete-orphan"
     )
     source_texts: Mapped[list["SourceText"]] = relationship(
+        back_populates="movie", cascade="all, delete-orphan"
+    )
+    chunks: Mapped[list["Chunk"]] = relationship(
         back_populates="movie", cascade="all, delete-orphan"
     )

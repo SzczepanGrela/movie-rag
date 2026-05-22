@@ -1,4 +1,5 @@
 from app.models.base import Base
+from app.models.chunk import Chunk
 from app.models.credits import MovieCast, MovieCrew
 from app.models.genre import Genre, movie_genres
 from app.models.movie import Movie
@@ -7,6 +8,7 @@ from app.models.source_text import SourceText
 
 __all__ = [
     "Base",
+    "Chunk",
     "Genre",
     "Movie",
     "MovieCast",

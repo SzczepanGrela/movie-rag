@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
 if TYPE_CHECKING:
+    from app.models.chunk import Chunk
     from app.models.movie import Movie
 
 
@@ -24,3 +25,6 @@ class SourceText(Base):
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     movie: Mapped["Movie"] = relationship(back_populates="source_texts")
+    chunks: Mapped[list["Chunk"]] = relationship(
+        back_populates="source_text", cascade="all, delete-orphan"
+    )
