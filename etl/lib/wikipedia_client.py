@@ -51,6 +51,19 @@ class WikipediaClient:
         data: dict[str, Any] = response.json()
         return data
 
+    async def search_title(self, query: str) -> str | None:
+        payload = await self._get(
+            {
+                "action": "query",
+                "list": "search",
+                "srsearch": query,
+                "srnamespace": 0,
+                "srlimit": 1,
+                "format": "json",
+            }
+        )
+        return _first_search_title(payload)
+
     async def get_plot(self, title: str) -> str | None:
         sections_response = await self._get(
             {"action": "parse", "page": title, "prop": "sections", "format": "json"}
@@ -69,6 +82,20 @@ class WikipediaClient:
             }
         )
         return _extract_text_html(body_response)
+
+
+def _first_search_title(payload: dict[str, Any]) -> str | None:
+    query = payload.get("query")
+    if not isinstance(query, dict):
+        return None
+    results = query.get("search")
+    if not isinstance(results, list) or not results:
+        return None
+    first = results[0]
+    if not isinstance(first, dict):
+        return None
+    title = first.get("title")
+    return title if isinstance(title, str) else None
 
 
 def _find_plot_section_index(payload: dict[str, Any]) -> str | None:

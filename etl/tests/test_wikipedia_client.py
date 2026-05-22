@@ -59,6 +59,41 @@ async def test_get_plot_returns_none_when_no_plot_section(
     assert plot is None
 
 
+async def test_search_title_returns_first_result(etl_settings: EtlSettings) -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(
+            200,
+            json={
+                "query": {
+                    "search": [
+                        {"title": "Fight Club"},
+                        {"title": "Fight Club (novel)"},
+                    ]
+                }
+            },
+        )
+
+    async with WikipediaClient(etl_settings, transport=httpx.MockTransport(handler)) as client:
+        title = await client.search_title("Fight Club 1999 film")
+
+    assert title == "Fight Club"
+    assert captured[0].url.params["srsearch"] == "Fight Club 1999 film"
+    assert captured[0].url.params["list"] == "search"
+
+
+async def test_search_title_returns_none_when_no_results(etl_settings: EtlSettings) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"query": {"search": []}})
+
+    async with WikipediaClient(etl_settings, transport=httpx.MockTransport(handler)) as client:
+        title = await client.search_title("nonexistent film 1899")
+
+    assert title is None
+
+
 async def test_get_plot_accepts_plot_summary_heading(etl_settings: EtlSettings) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.params.get("prop") == "sections":
