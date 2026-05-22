@@ -20,7 +20,7 @@ def with_retry(max_retries: int) -> Callable[[F], F]:
     def decorator(fn: F) -> F:
         return retry(
             retry=retry_if_exception(_is_retryable),
-            wait=wait_exponential(multiplier=1, min=1, max=10),
+            wait=wait_exponential(multiplier=1, min=1, max=60),
             stop=stop_after_attempt(max_retries),
             reraise=True,
         )(fn)
