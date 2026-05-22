@@ -25,6 +25,7 @@ class WikipediaClient:
             },
             timeout=settings.request_timeout_s,
             transport=transport,
+            follow_redirects=True,
         )
         self._limiter = AsyncLimiter(1, settings.wikipedia_min_interval_s)
         self._get = with_retry(settings.max_retries)(self._request)
