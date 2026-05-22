@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import BigInteger, DateTime, Integer, String, func
+from sqlalchemy import BigInteger, Date, DateTime, Float, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -23,6 +23,12 @@ class Movie(Base):
     original_title: Mapped[str | None] = mapped_column(String(500))
     year: Mapped[int | None] = mapped_column(Integer)
     runtime: Mapped[int | None] = mapped_column(Integer)
+    overview: Mapped[str | None] = mapped_column(Text)
+    tagline: Mapped[str | None] = mapped_column(Text)
+    release_date: Mapped[date | None] = mapped_column(Date)
+    vote_average: Mapped[float | None] = mapped_column(Float)
+    vote_count: Mapped[int | None] = mapped_column(Integer)
+    original_language: Mapped[str | None] = mapped_column(String(10))
     etl_status: Mapped[str] = mapped_column(String(20), server_default="seeded")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
