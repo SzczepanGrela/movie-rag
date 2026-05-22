@@ -12,9 +12,7 @@ if TYPE_CHECKING:
 
 class MovieCast(Base):
     __tablename__ = "movie_cast"
-    __table_args__ = (
-        UniqueConstraint("movie_id", "person_id", name="uq_movie_cast_movie_person"),
-    )
+    __table_args__ = (UniqueConstraint("movie_id", "person_id", name="uq_movie_cast_movie_person"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id", ondelete="CASCADE"), index=True)
@@ -29,9 +27,7 @@ class MovieCast(Base):
 class MovieCrew(Base):
     __tablename__ = "movie_crew"
     __table_args__ = (
-        UniqueConstraint(
-            "movie_id", "person_id", "job", name="uq_movie_crew_movie_person_job"
-        ),
+        UniqueConstraint("movie_id", "person_id", "job", name="uq_movie_crew_movie_person_job"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
