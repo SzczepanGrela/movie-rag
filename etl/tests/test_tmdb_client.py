@@ -47,6 +47,22 @@ async def test_get_movie_raises_on_404(etl_settings: EtlSettings) -> None:
             await client.get_movie(999_999)
 
 
+async def test_get_genres_hits_genre_list_endpoint(etl_settings: EtlSettings) -> None:
+    captured: dict[str, httpx.Request] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["request"] = request
+        return httpx.Response(200, json={"genres": [{"id": 28, "name": "Action"}]})
+
+    async with TmdbClient(etl_settings, transport=httpx.MockTransport(handler)) as client:
+        data = await client.get_genres()
+
+    assert data == {"genres": [{"id": 28, "name": "Action"}]}
+    request = captured["request"]
+    assert request.url.path == "/3/genre/movie/list"
+    assert request.url.params["language"] == "en-US"
+
+
 async def test_discover_passes_page_and_filters(etl_settings: EtlSettings) -> None:
     captured: dict[str, httpx.Request] = {}
 

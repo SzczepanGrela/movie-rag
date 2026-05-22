@@ -57,3 +57,6 @@ class TmdbClient:
     async def discover(self, page: int = 1, **filters: Any) -> dict[str, Any]:
         params: dict[str, Any] = {"page": page, **filters}
         return await self._get("/discover/movie", params)
+
+    async def get_genres(self) -> dict[str, Any]:
+        return await self._get("/genre/movie/list", {"language": "en-US"})

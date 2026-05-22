@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from typing import Any
 
-from sqlalchemy import func
+from sqlalchemy import Table, func
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -61,6 +61,28 @@ async def pg_upsert(
             index_elements=list(conflict_cols),
             set_=set_,
         )
+        await session.execute(stmt)
+        total += len(chunk)
+
+    await session.commit()
+    return total
+
+
+async def pg_insert_ignore(
+    session: AsyncSession,
+    table: Table,
+    rows: Sequence[dict[str, Any]],
+    conflict_cols: Sequence[str],
+    chunk_size: int = 500,
+) -> int:
+    if not rows:
+        return 0
+
+    total = 0
+    for offset in range(0, len(rows), chunk_size):
+        chunk = list(rows[offset : offset + chunk_size])
+        stmt = insert(table).values(chunk)
+        stmt = stmt.on_conflict_do_nothing(index_elements=list(conflict_cols))
         await session.execute(stmt)
         total += len(chunk)
 
