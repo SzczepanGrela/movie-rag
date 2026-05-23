@@ -16,6 +16,10 @@ class EtlSettings(BaseSettings):
     wikipedia_min_interval_s: float = 0.5
     request_timeout_s: float = 15.0
     max_retries: int = 6
+    google_cloud_project: str | None = None
+    google_cloud_location: str = "us-central1"
+    gemini_model: str = "gemini-2.5-flash"
+    gemini_max_concurrency: int = 5
 
     model_config = SettingsConfigDict(
         env_file=_ENV_FILE,
