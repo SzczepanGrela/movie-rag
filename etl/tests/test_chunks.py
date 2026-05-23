@@ -1,3 +1,6 @@
+import pytest
+
+from lib import chunks
 from lib.chunks import (
     CHUNK_OVERLAP,
     CHUNK_SIZE,
@@ -7,6 +10,21 @@ from lib.chunks import (
     chunk_row,
     split_tokens,
 )
+
+
+class FakeTokenizer:
+    """Char-level tokenizer (1 char = 1 token) — hermetic, no model download."""
+
+    def encode(self, text: str, add_special_tokens: bool = False) -> list[int]:
+        return [ord(c) for c in text]
+
+    def decode(self, token_ids: list[int], skip_special_tokens: bool = True) -> str:
+        return "".join(chr(t) for t in token_ids)
+
+
+@pytest.fixture(autouse=True)
+def fake_tokenizer(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(chunks, "_TOKENIZER", FakeTokenizer())
 
 
 def test_build_prefix_full() -> None:

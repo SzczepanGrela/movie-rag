@@ -1,4 +1,3 @@
-from functools import lru_cache
 from typing import Any, cast
 
 from transformers import AutoTokenizer, PreTrainedTokenizerBase
@@ -7,10 +6,14 @@ TOKENIZER_MODEL = "google/embeddinggemma-300m"
 CHUNK_SIZE = 512
 CHUNK_OVERLAP = 64
 
+_TOKENIZER: PreTrainedTokenizerBase | None = None
 
-@lru_cache(maxsize=1)
+
 def _tokenizer() -> PreTrainedTokenizerBase:
-    return AutoTokenizer.from_pretrained(TOKENIZER_MODEL)
+    global _TOKENIZER
+    if _TOKENIZER is None:
+        _TOKENIZER = AutoTokenizer.from_pretrained(TOKENIZER_MODEL)
+    return _TOKENIZER
 
 
 def build_prefix(title: str, year: int | None, genres: list[str]) -> str:
