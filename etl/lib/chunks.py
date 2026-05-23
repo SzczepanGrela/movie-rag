@@ -16,10 +16,9 @@ def _tokenizer() -> PreTrainedTokenizerBase:
     return _TOKENIZER
 
 
-def build_prefix(title: str, year: int | None, genres: list[str]) -> str:
+def build_embed_input(title: str, year: int | None, body: str) -> str:
     year_str = str(year) if year is not None else "unknown"
-    genres_str = ", ".join(sorted(genres)) if genres else "unknown"
-    return f"Title: {title} ({year_str}). Genres: {genres_str}. "
+    return f"title: {title} ({year_str}) | text: {body}"
 
 
 def split_tokens(tokens: list[int], *, size: int, overlap: int) -> list[list[int]]:

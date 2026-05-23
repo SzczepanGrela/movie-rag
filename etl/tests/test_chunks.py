@@ -5,7 +5,7 @@ from lib.chunks import (
     CHUNK_OVERLAP,
     CHUNK_SIZE,
     _tokenizer,
-    build_prefix,
+    build_embed_input,
     chunk_body,
     chunk_row,
     split_tokens,
@@ -27,24 +27,18 @@ def fake_tokenizer(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(chunks, "_TOKENIZER", FakeTokenizer())
 
 
-def test_build_prefix_full() -> None:
-    result = build_prefix("Fight Club", 1999, ["Drama"])
-    assert result == "Title: Fight Club (1999). Genres: Drama. "
-
-
-def test_build_prefix_year_none() -> None:
+def test_build_embed_input_full() -> None:
     assert (
-        build_prefix("Some Film", None, ["Action"])
-        == "Title: Some Film (unknown). Genres: Action. "
+        build_embed_input("Fight Club", 1999, "Tyler meets the narrator.")
+        == "title: Fight Club (1999) | text: Tyler meets the narrator."
     )
 
 
-def test_build_prefix_no_genres() -> None:
-    assert build_prefix("X", 2010, []) == "Title: X (2010). Genres: unknown. "
-
-
-def test_build_prefix_sorts_genres() -> None:
-    assert build_prefix("X", 2010, ["Drama", "Action"]).endswith("Genres: Action, Drama. ")
+def test_build_embed_input_year_none() -> None:
+    assert (
+        build_embed_input("Some Film", None, "Body text.")
+        == "title: Some Film (unknown) | text: Body text."
+    )
 
 
 def test_split_tokens_empty() -> None:
@@ -105,12 +99,12 @@ def test_chunk_row_fields() -> None:
         source_text_id=5,
         movie_id=42,
         chunk_index=0,
-        content="Title: X (2010). Genres: Drama. The cat sat.",
+        content="The cat sat on the mat.",
         embedding=embedding,
     )
     assert row["source_text_id"] == 5
     assert row["movie_id"] == 42
     assert row["chunk_index"] == 0
-    assert row["content"].startswith("Title: X")
+    assert row["content"] == "The cat sat on the mat."
     assert row["embedding"] == embedding
     assert row["token_count"] == len(_tokenizer().encode(row["content"], add_special_tokens=False))

@@ -6,7 +6,7 @@ from app.models import Chunk, Genre, Movie, SourceText, movie_genres
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from lib.chunks import CHUNK_OVERLAP, CHUNK_SIZE, build_prefix, chunk_body, chunk_row
+from lib.chunks import CHUNK_OVERLAP, CHUNK_SIZE, build_embed_input, chunk_body, chunk_row
 from lib.config import EtlSettings
 from lib.db import make_engine, make_session_factory
 from lib.embeddings import Embedder, GemmaEmbedder, embed_async
@@ -22,7 +22,8 @@ class ChunkPlan(NamedTuple):
     source_text_id: int
     movie_id: int
     chunk_index: int
-    content: str
+    body: str
+    embed_input: str
 
 
 def parse_args() -> argparse.Namespace:
@@ -87,7 +88,6 @@ def plan_chunks(
         m = meta.get(movie_id)
         if m is None:
             continue
-        prefix = build_prefix(m.title, m.year, m.genres)
         for source_text_id, content in source_texts:
             bodies = chunk_body(content, size=CHUNK_SIZE, overlap=CHUNK_OVERLAP)
             for chunk_index, (body, _token_count) in enumerate(bodies):
@@ -96,7 +96,8 @@ def plan_chunks(
                         source_text_id=source_text_id,
                         movie_id=movie_id,
                         chunk_index=chunk_index,
-                        content=prefix + body,
+                        body=body,
+                        embed_input=build_embed_input(m.title, m.year, body),
                     )
                 )
     return plans
@@ -114,14 +115,14 @@ async def process_batch(
     plans = plan_chunks(meta, texts_by_movie)
 
     if plans:
-        texts_to_embed = [p.content for p in plans]
-        vectors = await embed_async(embedder, texts_to_embed)
+        texts_to_embed = [p.embed_input for p in plans]
+        vectors = await embed_async(embedder, texts_to_embed, kind="document")
         rows = [
             chunk_row(
                 source_text_id=p.source_text_id,
                 movie_id=p.movie_id,
                 chunk_index=p.chunk_index,
-                content=p.content,
+                content=p.body,
                 embedding=vec,
             )
             for p, vec in zip(plans, vectors, strict=True)

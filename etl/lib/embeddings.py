@@ -1,25 +1,29 @@
 import asyncio
 import hashlib
 import math
-from typing import Protocol, cast
+from typing import Literal, Protocol, cast
 
 from sentence_transformers import SentenceTransformer
 
 EMBEDDING_MODEL = "google/embeddinggemma-300m"
 EMBEDDING_DIM = 768
 
+EmbedKind = Literal["query", "document"]
+
 
 class Embedder(Protocol):
-    def embed(self, texts: list[str]) -> list[list[float]]: ...
+    def embed(self, texts: list[str], *, kind: EmbedKind) -> list[list[float]]: ...
 
 
 class GemmaEmbedder:
     def __init__(self, model_name: str = EMBEDDING_MODEL) -> None:
         self._model = SentenceTransformer(model_name)
 
-    def embed(self, texts: list[str]) -> list[list[float]]:
+    def embed(self, texts: list[str], *, kind: EmbedKind) -> list[list[float]]:
+        prompt_name = "query" if kind == "query" else None
         vectors = self._model.encode(
             texts,
+            prompt_name=prompt_name,
             normalize_embeddings=True,
             batch_size=32,
             show_progress_bar=False,
@@ -29,7 +33,8 @@ class GemmaEmbedder:
 
 
 class FakeEmbedder:
-    def embed(self, texts: list[str]) -> list[list[float]]:
+    def embed(self, texts: list[str], *, kind: EmbedKind) -> list[list[float]]:
+        _ = kind
         return [_fake_vector(text) for text in texts]
 
 
@@ -43,5 +48,7 @@ def _fake_vector(text: str) -> list[float]:
     return [f / norm for f in floats]
 
 
-async def embed_async(embedder: Embedder, texts: list[str]) -> list[list[float]]:
-    return await asyncio.to_thread(embedder.embed, texts)
+async def embed_async(
+    embedder: Embedder, texts: list[str], *, kind: EmbedKind
+) -> list[list[float]]:
+    return await asyncio.to_thread(embedder.embed, texts, kind=kind)
