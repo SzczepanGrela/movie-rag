@@ -7,6 +7,11 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-dev
 
+ENV HF_HOME=/app/.cache/huggingface
+RUN --mount=type=secret,id=hf_token \
+    HF_TOKEN=$(cat /run/secrets/hf_token) \
+    .venv/bin/python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('google/embeddinggemma-300m')"
+
 COPY app/ ./app/
 COPY alembic.ini ./
 COPY migrations/ ./migrations/
