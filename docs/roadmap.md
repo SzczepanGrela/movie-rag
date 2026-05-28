@@ -193,37 +193,46 @@ Monitoring:
 
 ---
 
-## Milestone 4 — Backend retrieval pipeline
+## Milestone 4 — Backend retrieval pipeline (pure vector)
+
+**Architectural split (decided 2026-05-28):** retrieval is divided into two endpoints with different SLAs.
+- **`/api/search`** — pure vector, no LLM, no quota, instant. Best-effort similarity over chunks. Lives in M4.
+- **`/api/explain`** — LLM-driven, agentic, schema-C aware, rate-limited. Handles natural-language constraints (actor / year / genre filters) via tool-calling. Lives in M7.
+
+This split keeps M4 fast and deterministic; the smart layer (LLM query understanding, structured filters, schema C synthesis) is the dedicated job of M7.
 
 **Goal:** The endpoints `/api/search`, `/api/movies/:id`, `/api/quota` work end-to-end. A local test (curl/httpie/pytest) returns relevant results.
 
 **Deliverables:**
-- `backend/app/services/fuzzy_actors.py` — rapidfuzz matcher over the in-RAM actor list
-- `backend/app/services/retrieval.py` — embed query → pgvector search → rerank → dedup → hydrate
-- `backend/app/services/models.py` — singleton for EmbeddingGemma + bge-reranker-base (load at startup)
-- `backend/app/routers/search.py` — `POST /api/search`
-- `backend/app/routers/movies.py` — `GET /api/movies/:id` with full hydration
-- `backend/app/routers/quota.py` — `GET /api/quota` (initial: hardcoded; full tracking in M7)
-- `backend/app/middleware/rate_limit.py` — slowapi per IP
-- Pytest fixtures: load mini-fixtures (10 movies) for integration tests
-- Integration tests for each endpoint (TestClient + test DB)
+- `backend/app/search/embedder.py` — `Embedder` Protocol + `GemmaEmbedder` (sentence-transformers EmbeddingGemma, `prompt_name="query"` for queries; pre-formatted `title: X (year) | text: <body>` for documents) + `FakeEmbedder` for hermetic tests
+- `backend/app/search/service.py` — embed query → pgvector cosine top-K → dedup per movie → hydrate
+- `backend/app/routers/search.py` — `POST /api/search` (Annotated DI for session + embedder)
+- `backend/app/routers/movies.py` — `GET /api/movies/:id` with full hydration (movie + genres + cast top-15 + crew + source_texts + schema-C tables)
+- `backend/app/routers/quota.py` — `GET /api/quota` (placeholder until M7 — `/api/search` itself has no quota; this surfaces `/api/explain` budget)
+- `backend/app/middleware/rate_limit.py` — slowapi per IP (light per-route limits; the strict limit lives in M7 around `/api/explain`)
+- Pytest fixtures + integration tests for each endpoint (TestClient + dependency_overrides)
+
+**NOT in M4 anymore (moved to M7):**
+- Fuzzy actor extraction (rapidfuzz over actor list) — replaced by LLM filter extraction in `/api/explain`
+- Cross-encoder reranking (bge-reranker-base) — abandoned 2026-05-23 because the base model gives ~6s p50 on CPU VPS (60× regression). If reranking is reintroduced later it would be a distilled model (`ms-marco-MiniLM-L6-v2`) as its own slice; it is not blocking v1.
 
 **Acceptance:**
-- `POST /api/search` with `{"query": "movies with Tom Hardy about dreams"}` returns Tom-Hardy films or dream-themed films, `matched_actors: ["Tom Hardy"]`
-- `/search` latency < 500 ms p95 locally (models warm)
+- `POST /api/search` with `{"query": "samurai honor and revenge"}` returns sensible top-5 (semantic relevance) with latency < 100 ms p95 locally (model warm)
 - `GET /api/movies/:id` returns full object with plot variants, scenes, characters, quotes
-- Rate limit works (61st request in a minute → 429)
+- Rate limit works (per-IP) — 429 on burst
 - All integration tests pass
 
 **Learning surface (Python/RAG):**
-- Singleton pattern for heavy AI models
-- rapidfuzz fuzzy matching
-- pgvector queries (`<=>` operator)
-- Cross-encoder reranking
+- Singleton pattern for heavy AI models (FastAPI lifespan + `app.state` + DI)
+- Asymmetric query/document embedding (prompt-aware encoding)
+- pgvector queries (`<=>` operator, HNSW index, `cosine_distance` ORM)
+- Two-endpoint architecture (fast deterministic vs LLM-driven smart)
 - FastAPI middleware patterns
 - Integration testing against a test DB
 
 **Estimate:** 2-3 sessions
+
+**Status (2026-05-28):** `POST /api/search` shipped to production. `GET /api/movies/:id` and `/api/quota` still pending.
 
 **Dependencies:** M3
 
@@ -315,40 +324,49 @@ Monitoring:
 
 ---
 
-## Milestone 7 — `/api/explain` endpoint + streaming SSE + Turnstile
+## Milestone 7 — Agentic `/api/explain` (LLM tool-use over schema C)
 
-**Goal:** The "✨ Explain match" button on the detail page works: Turnstile validation → call to Gemini → token-by-token streaming in the UI.
+**Architectural pivot (decided 2026-05-28):** `/api/explain` is no longer "stream a Gemini explanation for the search results already shown". It is the **smart entry point** of the system. It takes the raw user query, an LLM (a) parses intent + extracts structured filters (actor / year / genre / director), (b) calls retrieval tools internally (`/api/search` semantic + structured WHERE), (c) optionally pulls richer context from schema C (scenes, character_descriptions, quotes), (d) synthesizes a final answer with citations.
+
+This handles the known weakness of bi-encoders: pure vector retrieval is poor at exact-match on proper nouns ("film z Nicolasem Cagem"). LLM query understanding solves it cleanly without needing fuzzy actor extraction or hand-tuned filters.
+
+**Provider:** TBD between **Groq + llama-3.3-70b** (free tier, ~400ms, 30 req/min, strong tool calling) and **Google AI Studio + Gemini 2.0 Flash** (free tier, 15 req/min, strong PL). Decision deferred to the start of M7. Gemini Vertex remains used by the **ETL** (schema C generation) only — it is not used by `/api/explain`.
 
 **Deliverables:**
-- `backend/app/services/turnstile.py` — verify token via Cloudflare API
-- `backend/app/services/gemini.py` — async streaming generation with Gemini Flash
-- `backend/app/services/quota.py` — daily counter (Redis or a file with lock — starting with a file; Redis can come later)
-- `backend/app/routers/explain.py` — `POST /api/explain` with `StreamingResponse` SSE
+- `backend/app/llm/client.py` — `LLMClient` Protocol + concrete (Groq or Gemini) + `FakeLLMClient` for tests
+- `backend/app/llm/tools.py` — function-calling tool schemas: `search_movies(semantic_query, filters)`, `get_movie_detail(id)`, `get_movie_scenes(movie_id, query)`, `get_movie_quotes(movie_id, query)`
+- `backend/app/services/turnstile.py` — verify token via Cloudflare API (kept for spam protection on the expensive endpoint)
+- `backend/app/services/quota.py` — daily counter per IP (Redis or file-backed with lock)
+- `backend/app/routers/explain.py` — `POST /api/explain` with `StreamingResponse` SSE (LLM step-by-step: tool calls + final synthesis)
+- `backend/app/routers/quota.py` — full counter integration (replaces M4 placeholder)
 - `frontend/src/components/TurnstileWidget.tsx` — Cloudflare Turnstile React widget
 - `frontend/src/hooks/useExplainStream.ts` — custom hook with fetch + ReadableStream SSE parser
-- `frontend/src/components/ExplainSection.tsx` — button + Turnstile + streaming text area
-- Update `frontend/src/routes/movie.$id.tsx` — integrate ExplainSection
+- `frontend/src/components/ExplainSection.tsx` — input + Turnstile + streaming results + cited movie cards
 - Update `QuotaBanner` — shows current state polling `/api/quota`
 
+**Pre-requisite (separate sub-slice, may land before M7):** **embed-scenes** — embedding the `scenes` table (105 k rows) so `get_movie_scenes` can do semantic lookup, not just LIKE. Decision pending — if not done, `get_movie_scenes` falls back to fetching all scenes for a movie and letting the LLM filter.
+
 **Acceptance:**
-- Clicking "Explain" → Turnstile widget appears (if a challenge is needed) → token submission → Gemini stream
-- Text appears in the UI token-by-token (visible streaming, not all at once)
-- Quota exhausted → 429 → UI disables the button, banner shows countdown to reset
-- Backend rate limit (5/min per IP) works
-- Backend Turnstile verify rejects invalid tokens
+- `POST /api/explain {"query": "film with Nicolas Cage where he jumps from a building"}` returns a structured answer naming the film(s) with citations
+- Pure-vector `/api/search` continues to work independently (no LLM dependency, no shared quota)
+- LLM tool calls validated server-side (no hallucinated filters — e.g. unknown actors → fall back gracefully)
+- Backend rate limit (5/min per IP) + daily quota work; 429 with `resets_at`
+- Turnstile gate rejects invalid tokens
+- Provider error (rate limit / timeout) returns a graceful 503 with retry-after, not a crash
 
 **Learning surface:**
+- LLM tool calling / function calling
+- Agentic RAG pattern (LLM as orchestrator over retrieval tools)
 - Async generators in Python (`async def ... yield`)
-- FastAPI `StreamingResponse` + SSE format (`event: ...\ndata: ...\n\n`)
-- Server-Sent Events — what they are vs WebSocket
-- ReadableStream in the browser + manual SSE chunk parsing
-- Custom React hooks with subscription-style effects
+- FastAPI `StreamingResponse` + SSE format
+- ReadableStream parsing in the browser
+- Structured filter extraction with validation against the DB
 - AbortController for cleanup
 - Cloudflare Turnstile integration
 
-**Estimate:** 2 sessions
+**Estimate:** 3-4 sessions (more than the old M7 because the agentic layer is the new heart of the system)
 
-**Dependencies:** M6
+**Dependencies:** M6 (UI integration). Internally also depends on `GET /api/movies/:id` from M4 (used as a tool).
 
 ---
 
@@ -420,5 +438,8 @@ If MAD proves insufficient — an OpenSubtitles VIP → Gemini → structured sc
 
 ## Status
 
-- **Current milestone:** none (before M1)
-- **Suggested start:** M1 (Repo skeleton + backend baseline) — in a new session
+- **Current milestone:** M4 in progress
+- **Done:** M1, M1.5, M2 (A–G), M3 (chunking + EmbeddingGemma + pgvector HNSW), schema-C generation (Gemini Vertex → 6 tables, 4 706 / 4 719 movies; data backfilled to prod-DB on 2026-05-23), M4 minimal (`POST /api/search` shipped, prompt-aware embed re-run on 13 556 chunks).
+- **Open inside M4:** `GET /api/movies/:id`, `/api/quota` placeholder, per-IP rate limit.
+- **Open architectural pivots:** see updated M4 and M7 sections above (clean split: pure vector `/api/search` vs agentic `/api/explain`).
+- **Suggested next step:** `GET /api/movies/:id` — small focused slice, unblocks both M5 frontend and the `get_movie_detail` tool in M7.
