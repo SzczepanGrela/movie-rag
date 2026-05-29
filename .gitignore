@@ -20,3 +20,11 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Frontend (Node/Bun)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Superpowers brainstorm session artifacts (mockups, state)
+.superpowers/

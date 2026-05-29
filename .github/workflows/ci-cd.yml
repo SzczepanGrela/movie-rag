@@ -94,6 +94,21 @@ jobs:
       - run: uv run mypy
       - run: uv run pytest
 
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bunx biome check .
+      - run: bunx tsc --noEmit
+      - run: bun run build
+
   smoke-build:
     name: Smoke build image
     if: github.event_name == 'pull_request'
