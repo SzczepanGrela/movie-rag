@@ -1,11 +1,18 @@
 export type BestChunk = { text: string; score: number };
 
+export type PosterData = {
+  url: string;
+  thumb_url: string;
+  blurhash: string | null;
+};
+
 export type SearchResult = {
   movie_id: number;
   title: string;
   year: number | null;
   score: number;
   best_chunk: BestChunk;
+  poster: PosterData | null;
 };
 
 export type SearchResponse = {
@@ -81,6 +88,7 @@ export type MovieDetail = {
   vote_count: number | null;
   original_language: string | null;
   schema_c_status: string;
+  poster: PosterData | null;
   genres: GenreOut[];
   cast: CastMemberOut[];
   crew: CrewMemberOut[];

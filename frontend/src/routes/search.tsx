@@ -3,8 +3,9 @@ import { createRoute, Link } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { MovieRagLogo } from "@/components/MovieRagLogo";
+import { Poster } from "@/components/Poster";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type SearchResponse, searchMovies } from "@/lib/api";
@@ -124,31 +125,37 @@ export function SearchPage() {
                   className="block"
                 >
                   <Card className="group cursor-pointer transition-all border-border/80 hover:border-primary/50 hover:shadow-[0_10px_40px_-12px_rgba(245,213,71,0.25)] hover:-translate-y-0.5">
-                    <CardHeader>
-                      <div className="flex items-baseline justify-between gap-3">
-                        <CardTitle className="text-lg leading-tight tracking-tight group-hover:text-primary transition-colors">
-                          {r.title}
-                        </CardTitle>
-                        <div className="flex items-baseline gap-2 shrink-0">
-                          {r.year ? (
-                            <span className="font-mono text-[11px] text-muted-foreground tracking-wider">
-                              {r.year}
+                    <div className="flex gap-4 p-4">
+                      <Poster
+                        poster={r.poster}
+                        size="thumb"
+                        alt={`${r.title} poster`}
+                        className="w-16 shrink-0"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-baseline justify-between gap-3">
+                          <h3 className="text-lg font-semibold leading-tight tracking-tight group-hover:text-primary transition-colors">
+                            {r.title}
+                          </h3>
+                          <div className="flex items-baseline gap-2 shrink-0">
+                            {r.year ? (
+                              <span className="font-mono text-[11px] text-muted-foreground tracking-wider">
+                                {r.year}
+                              </span>
+                            ) : null}
+                            <span className="rounded-full bg-primary text-primary-foreground px-2.5 py-0.5 text-[11px] font-bold tracking-tight">
+                              {matchPct}%
                             </span>
-                          ) : null}
-                          <span className="rounded-full bg-primary text-primary-foreground px-2.5 py-0.5 text-[11px] font-bold tracking-tight">
-                            {matchPct}%
-                          </span>
+                          </div>
                         </div>
+                        <p className="mt-2 line-clamp-3 text-sm text-foreground/80 leading-relaxed">
+                          {r.best_chunk.text}
+                        </p>
+                        <p className="mt-2 font-mono text-[10px] text-muted-foreground/70">
+                          #{r.movie_id}
+                        </p>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="line-clamp-3 text-sm text-foreground/80 leading-relaxed">
-                        {r.best_chunk.text}
-                      </p>
-                      <p className="mt-2 font-mono text-[10px] text-muted-foreground/70">
-                        #{r.movie_id}
-                      </p>
-                    </CardContent>
+                    </div>
                   </Card>
                 </Link>
               );

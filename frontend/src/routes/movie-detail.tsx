@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createRoute, Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { MovieRagLogo } from "@/components/MovieRagLogo";
+import { Poster } from "@/components/Poster";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -219,39 +220,47 @@ function Hero({ movie }: { movie: MovieDetail }) {
   ].filter(Boolean);
 
   return (
-    <header className="space-y-3">
-      <div className="flex items-start justify-between gap-4">
-        <h1 className="text-4xl font-bold tracking-tight leading-tight">
-          {movie.title}
-        </h1>
-        {movie.vote_average !== null && (
-          <span className="shrink-0 rounded-full bg-primary text-primary-foreground px-3 py-1 text-sm font-bold tracking-tight">
-            {movie.vote_average.toFixed(1)}★
-          </span>
+    <header className="flex flex-col gap-6 sm:flex-row">
+      <Poster
+        poster={movie.poster}
+        size="full"
+        alt={`${movie.title} poster`}
+        className="w-40 shrink-0 self-center sm:w-48 sm:self-start"
+      />
+      <div className="flex-1 space-y-3">
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="text-4xl font-bold tracking-tight leading-tight">
+            {movie.title}
+          </h1>
+          {movie.vote_average !== null && (
+            <span className="shrink-0 rounded-full bg-primary text-primary-foreground px-3 py-1 text-sm font-bold tracking-tight">
+              {movie.vote_average.toFixed(1)}★
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-3 flex-wrap text-sm text-muted-foreground">
+          {metaParts.length > 0 && (
+            <span className="font-mono">{metaParts.join(" · ")}</span>
+          )}
+          {movie.genres.length > 0 && (
+            <span className="flex items-center gap-1.5 flex-wrap">
+              {movie.genres.map((g) => (
+                <span
+                  key={g.name}
+                  className="rounded-full bg-primary/15 text-primary px-2 py-0.5 text-[11px] font-medium"
+                >
+                  {g.name}
+                </span>
+              ))}
+            </span>
+          )}
+        </div>
+        {movie.tagline && (
+          <p className="italic text-muted-foreground text-base">
+            "{movie.tagline}"
+          </p>
         )}
       </div>
-      <div className="flex items-center gap-3 flex-wrap text-sm text-muted-foreground">
-        {metaParts.length > 0 && (
-          <span className="font-mono">{metaParts.join(" · ")}</span>
-        )}
-        {movie.genres.length > 0 && (
-          <span className="flex items-center gap-1.5 flex-wrap">
-            {movie.genres.map((g) => (
-              <span
-                key={g.name}
-                className="rounded-full bg-primary/15 text-primary px-2 py-0.5 text-[11px] font-medium"
-              >
-                {g.name}
-              </span>
-            ))}
-          </span>
-        )}
-      </div>
-      {movie.tagline && (
-        <p className="italic text-muted-foreground text-base">
-          "{movie.tagline}"
-        </p>
-      )}
     </header>
   );
 }
