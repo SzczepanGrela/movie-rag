@@ -11,6 +11,9 @@ dependencies = [
     "beautifulsoup4>=4.13.0",
     "sentence-transformers>=4.0.0",
     "google-genai>=1.0.0",
+    "boto3>=1.35.0",
+    "blurhash-python>=1.2.0",
+    "pillow>=11.0.0",
 ]
 
 [tool.uv.sources]
@@ -55,3 +58,7 @@ indent-style = "space"
 python_version = "3.12"
 strict = true
 files = ["lib", "tests"]
+
+[[tool.mypy.overrides]]
+module = ["boto3", "blurhash"]
+ignore_missing_imports = true

@@ -24,6 +24,7 @@ def to_enrichment_row(detail: dict[str, Any]) -> dict[str, Any]:
         "vote_average": detail.get("vote_average"),
         "vote_count": detail.get("vote_count"),
         "original_language": detail.get("original_language") or None,
+        "poster_path": detail.get("poster_path") or None,
         "etl_status": "enriched",
     }
 

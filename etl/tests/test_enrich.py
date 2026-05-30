@@ -19,6 +19,7 @@ _DETAIL = {
     "vote_average": 8.4,
     "vote_count": 27000,
     "original_language": "en",
+    "poster_path": "/fightclub.jpg",
     "genres": [{"id": 18, "name": "Drama"}, {"id": 53, "name": "Thriller"}],
 }
 
@@ -37,6 +38,7 @@ def test_to_enrichment_row_maps_full_detail() -> None:
     assert row["vote_average"] == 8.4
     assert row["vote_count"] == 27000
     assert row["original_language"] == "en"
+    assert row["poster_path"] == "/fightclub.jpg"
     assert row["etl_status"] == "enriched"
 
 

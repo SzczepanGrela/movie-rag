@@ -20,6 +20,10 @@ class EtlSettings(BaseSettings):
     google_cloud_location: str = "us-central1"
     gemini_model: str = "gemini-2.5-flash"
     gemini_max_concurrency: int = 5
+    r2_account_id: str | None = None
+    r2_access_key_id: str | None = None
+    r2_secret_access_key: str | None = None
+    r2_bucket: str = "movierag-assets"
 
     model_config = SettingsConfigDict(
         env_file=_ENV_FILE,
