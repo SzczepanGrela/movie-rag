@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Chunk, Movie
+from app.posters import build_poster
 from app.schemas.search import BestChunk, SearchResponse, SearchResult
 from app.search.embedder import Embedder, embed_async
 
@@ -23,7 +24,16 @@ async def search(
 
     distance = Chunk.embedding.cosine_distance(vec).label("dist")
     stmt = (
-        select(Chunk.movie_id, Chunk.content, distance, Movie.title, Movie.year)
+        select(
+            Chunk.movie_id,
+            Chunk.content,
+            distance,
+            Movie.title,
+            Movie.year,
+            Movie.tmdb_id,
+            Movie.poster_path,
+            Movie.blurhash,
+        )
         .join(Movie, Movie.id == Chunk.movie_id)
         .order_by(distance)
         .limit(limit * OVERSAMPLE_FACTOR)
@@ -32,7 +42,7 @@ async def search(
 
     seen: set[int] = set()
     results: list[SearchResult] = []
-    for movie_id, content, dist, title, year in rows:
+    for movie_id, content, dist, title, year, tmdb_id, poster_path, blurhash in rows:
         if movie_id in seen:
             continue
         seen.add(movie_id)
@@ -43,6 +53,7 @@ async def search(
                 year=year,
                 score=1.0 - float(dist),
                 best_chunk=BestChunk(text=content, score=1.0 - float(dist)),
+                poster=build_poster(tmdb_id, poster_path, blurhash),
             )
         )
         if len(results) >= limit:

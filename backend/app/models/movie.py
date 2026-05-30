@@ -38,6 +38,8 @@ class Movie(Base):
     vote_average: Mapped[float | None] = mapped_column(Float)
     vote_count: Mapped[int | None] = mapped_column(Integer)
     original_language: Mapped[str | None] = mapped_column(String(10))
+    poster_path: Mapped[str | None] = mapped_column(Text)
+    blurhash: Mapped[str | None] = mapped_column(Text)
     etl_status: Mapped[str] = mapped_column(String(20), server_default="seeded")
     schema_c_status: Mapped[str] = mapped_column(String(20), server_default="pending")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

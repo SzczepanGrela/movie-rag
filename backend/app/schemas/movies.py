@@ -2,6 +2,8 @@ from datetime import date, datetime
 
 from pydantic import BaseModel
 
+from app.schemas.poster import PosterOut
+
 
 class GenreOut(BaseModel):
     name: str
@@ -57,6 +59,7 @@ class MovieDetail(BaseModel):
     vote_count: int | None
     original_language: str | None
     schema_c_status: str
+    poster: PosterOut | None
 
     genres: list[GenreOut]
     cast: list[CastMemberOut]

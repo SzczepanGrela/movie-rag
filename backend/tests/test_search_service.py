@@ -25,9 +25,9 @@ class _FakeSession:
 @pytest.mark.asyncio
 async def test_dedup_keeps_lowest_distance_per_movie() -> None:
     rows = [
-        (1, "chunk A1 (best)", 0.10, "Inception", 2010),
-        (1, "chunk A2", 0.30, "Inception", 2010),
-        (2, "chunk B1", 0.20, "Matrix", 1999),
+        (1, "chunk A1 (best)", 0.10, "Inception", 2010, 27205, "/inception.jpg", "LKO2hash"),
+        (1, "chunk A2", 0.30, "Inception", 2010, 27205, "/inception.jpg", "LKO2hash"),
+        (2, "chunk B1", 0.20, "Matrix", 1999, 603, None, None),
     ]
     session = _FakeSession(rows)
 
@@ -41,11 +41,24 @@ async def test_dedup_keeps_lowest_distance_per_movie() -> None:
     assert [r.movie_id for r in response.results] == [1, 2]
     assert response.results[0].best_chunk.text == "chunk A1 (best)"
     assert response.total_candidates == 3
+    assert response.results[0].poster is not None
+    assert (
+        response.results[0].poster.url == "https://movierag-assets.grela.dev/posters/w500/27205.jpg"
+    )
+    assert (
+        response.results[0].poster.thumb_url
+        == "https://movierag-assets.grela.dev/posters/w154/27205.jpg"
+    )
+    assert response.results[0].poster.blurhash == "LKO2hash"
+    assert response.results[1].poster is None
 
 
 @pytest.mark.asyncio
 async def test_limit_trims_after_dedup() -> None:
-    rows = [(i, f"chunk {i}", 0.1 * i, f"Movie {i}", 2000 + i) for i in range(1, 6)]
+    rows = [
+        (i, f"chunk {i}", 0.1 * i, f"Movie {i}", 2000 + i, 1000 + i, None, None)
+        for i in range(1, 6)
+    ]
     session = _FakeSession(rows)
 
     response = await service.search(
@@ -61,7 +74,7 @@ async def test_limit_trims_after_dedup() -> None:
 
 @pytest.mark.asyncio
 async def test_score_is_one_minus_distance() -> None:
-    rows = [(7, "txt", 0.25, "Title", 2020)]
+    rows = [(7, "txt", 0.25, "Title", 2020, 700, None, None)]
     session = _FakeSession(rows)
 
     response = await service.search(

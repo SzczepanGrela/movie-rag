@@ -33,8 +33,8 @@ def _override_session_with(rows: list[Any]) -> Callable[[], AsyncIterator[_FakeS
 
 async def test_search_endpoint_returns_results_with_fake_deps() -> None:
     rows = [
-        (1, "Cobb plants an idea", 0.10, "Inception", 2010),
-        (2, "The Matrix is everywhere", 0.20, "The Matrix", 1999),
+        (1, "Cobb plants an idea", 0.10, "Inception", 2010, 27205, "/inception.jpg", "LKO2hash"),
+        (2, "The Matrix is everywhere", 0.20, "The Matrix", 1999, 603, None, None),
     ]
     app.dependency_overrides[get_embedder] = FakeEmbedder
     app.dependency_overrides[get_session] = _override_session_with(rows)
@@ -58,6 +58,12 @@ async def test_search_endpoint_returns_results_with_fake_deps() -> None:
     assert first["title"] == "Inception"
     assert first["score"] == 0.9
     assert first["best_chunk"]["text"] == "Cobb plants an idea"
+    assert first["poster"]["url"] == "https://movierag-assets.grela.dev/posters/w500/27205.jpg"
+    assert (
+        first["poster"]["thumb_url"] == "https://movierag-assets.grela.dev/posters/w154/27205.jpg"
+    )
+    assert first["poster"]["blurhash"] == "LKO2hash"
+    assert body["results"][1]["poster"] is None
 
 
 async def test_search_endpoint_rejects_empty_query() -> None:

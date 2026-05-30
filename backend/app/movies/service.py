@@ -4,6 +4,7 @@ from sqlalchemy.orm import selectinload
 
 from app.models import Movie
 from app.models.credits import MovieCast, MovieCrew
+from app.posters import build_poster
 from app.schemas.movies import (
     CastMemberOut,
     CharacterDescriptionOut,
@@ -107,6 +108,7 @@ def to_detail(movie: Movie) -> MovieDetail:
         vote_count=movie.vote_count,
         original_language=movie.original_language,
         schema_c_status=movie.schema_c_status,
+        poster=build_poster(movie.tmdb_id, movie.poster_path, movie.blurhash),
         genres=[GenreOut(name=g.name) for g in movie.genres],
         cast=cast,
         crew=crew,

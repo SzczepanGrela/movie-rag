@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 
+from app.schemas.poster import PosterOut
+
 
 class SearchRequest(BaseModel):
     query: str = Field(min_length=1, max_length=500)
@@ -17,6 +19,7 @@ class SearchResult(BaseModel):
     year: int | None
     score: float
     best_chunk: BestChunk
+    poster: PosterOut | None
 
 
 class SearchResponse(BaseModel):

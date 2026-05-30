@@ -39,6 +39,8 @@ def _make_minimal_movie(*, schema_c_status: str = "done") -> Movie:
         vote_average=8.4,
         vote_count=35000,
         original_language="en",
+        poster_path="/inception.jpg",
+        blurhash="LKO2hash",
         etl_status="done",
         schema_c_status=schema_c_status,
     )
@@ -151,6 +153,20 @@ def test_to_detail_full_movie() -> None:
     assert not hasattr(detail.scenes[0], "description")
     assert detail.quotes[0].attributed_to == "Eames"
     assert detail.character_descriptions[0].character_name == "Cobb"
+    assert detail.poster is not None
+    assert detail.poster.url == "https://movierag-assets.grela.dev/posters/w500/27205.jpg"
+    assert detail.poster.thumb_url == "https://movierag-assets.grela.dev/posters/w154/27205.jpg"
+    assert detail.poster.blurhash == "LKO2hash"
+
+
+def test_to_detail_poster_none_when_no_poster_path() -> None:
+    m = _make_minimal_movie()
+    m.poster_path = None
+    m.blurhash = None
+
+    detail = to_detail(m)
+
+    assert detail.poster is None
 
 
 def test_to_detail_movie_without_schema_c() -> None:

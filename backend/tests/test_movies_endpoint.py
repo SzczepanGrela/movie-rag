@@ -47,6 +47,8 @@ def _make_movie() -> Movie:
         vote_average=8.4,
         vote_count=35000,
         original_language="en",
+        poster_path="/inception.jpg",
+        blurhash="LKO2hash",
         etl_status="done",
         schema_c_status="done",
     )
@@ -82,6 +84,8 @@ async def test_endpoint_returns_200_for_existing_movie() -> None:
     assert body["genres"] == [{"name": "Action"}]
     assert body["scenes"] == []
     assert body["atmosphere"] is None
+    assert body["poster"]["url"] == "https://movierag-assets.grela.dev/posters/w500/27205.jpg"
+    assert body["poster"]["blurhash"] == "LKO2hash"
 
 
 async def test_endpoint_returns_404_for_missing_movie() -> None:
