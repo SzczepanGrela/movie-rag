@@ -8,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.db import engine
 from app.explain import router as explain_router
+from app.explain.provider import build_provider
 from app.routers import movies as movies_router
 from app.routers import search as search_router
 from app.search.embedder import GemmaEmbedder
@@ -16,7 +17,7 @@ from app.search.embedder import GemmaEmbedder
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.embedder = GemmaEmbedder()
-    app.state.provider = None
+    app.state.provider = build_provider()
     yield
 
 
