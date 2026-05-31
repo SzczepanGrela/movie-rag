@@ -7,6 +7,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.db import engine
+from app.explain import router as explain_router
 from app.routers import movies as movies_router
 from app.routers import search as search_router
 from app.search.embedder import GemmaEmbedder
@@ -15,12 +16,14 @@ from app.search.embedder import GemmaEmbedder
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.embedder = GemmaEmbedder()
+    app.state.provider = None
     yield
 
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(search_router.router)
 app.include_router(movies_router.router)
+app.include_router(explain_router.router)
 
 
 class HealthResponse(BaseModel):
