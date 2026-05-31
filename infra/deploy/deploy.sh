@@ -27,3 +27,4 @@ check_health() {
 }
 
 check_health "API" "movierag-api"
+check_health "Frontend" "movierag-frontend"

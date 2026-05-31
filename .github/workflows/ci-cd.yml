@@ -125,10 +125,17 @@ jobs:
           cache-to: type=gha,mode=max
           secrets: |
             hf_token=${{ secrets.HF_TOKEN }}
+      - name: Build frontend image without pushing
+        uses: docker/build-push-action@v7
+        with:
+          context: frontend
+          push: false
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
 
   build-push:
     name: Build and push image to GHCR
-    needs: [lint, type-check, test, etl]
+    needs: [lint, type-check, test, etl, frontend]
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
@@ -157,6 +164,16 @@ jobs:
           cache-to: type=gha,mode=max
           secrets: |
             hf_token=${{ secrets.HF_TOKEN }}
+      - name: Build and push frontend
+        uses: docker/build-push-action@v7
+        with:
+          context: frontend
+          push: true
+          tags: |
+            ${{ env.IMAGE }}-frontend:latest
+            ${{ env.IMAGE }}-frontend:${{ env.SHORT_SHA }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
 
   deploy:
     name: Deploy to VPS

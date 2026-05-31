@@ -8,3 +8,9 @@ services:
       context: ../backend
     ports:
       - "127.0.0.1:8000:8000"
+
+  frontend:
+    build:
+      context: ../frontend
+    ports:
+      - "127.0.0.1:8080:80"

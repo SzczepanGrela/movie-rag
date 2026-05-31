@@ -48,6 +48,27 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  frontend:
+    image: ghcr.io/szczepangrela/movie-rag-frontend:latest
+    container_name: movierag-frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    expose:
+      - "80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
 volumes:
   movierag_db_data:
 
