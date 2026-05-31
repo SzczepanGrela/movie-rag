@@ -95,9 +95,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
 async def run_search_movies(
     session: AsyncSession, embedder: Embedder, semantic_query: str
 ) -> list[dict[str, Any]]:
-    resp = await search_service.search(
-        session, embedder, query=semantic_query, limit=SEARCH_LIMIT
-    )
+    resp = await search_service.search(session, embedder, query=semantic_query, limit=SEARCH_LIMIT)
     return [
         {
             "movie_id": r.movie_id,
@@ -128,9 +126,13 @@ async def run_get_movie_detail(session: AsyncSession, movie_id: int) -> dict[str
 
 async def run_get_movie_scenes(session: AsyncSession, movie_id: int) -> list[dict[str, Any]]:
     scenes = (
-        (await session.execute(
-            select(Scene).where(Scene.movie_id == movie_id).order_by(Scene.scene_index)
-        )).scalars().all()
+        (
+            await session.execute(
+                select(Scene).where(Scene.movie_id == movie_id).order_by(Scene.scene_index)
+            )
+        )
+        .scalars()
+        .all()
     )
     return [
         {
@@ -146,9 +148,13 @@ async def run_get_movie_scenes(session: AsyncSession, movie_id: int) -> list[dic
 
 async def run_get_movie_quotes(session: AsyncSession, movie_id: int) -> list[dict[str, Any]]:
     quotes = (
-        (await session.execute(
-            select(Quote).where(Quote.movie_id == movie_id).order_by(Quote.quote_index)
-        )).scalars().all()
+        (
+            await session.execute(
+                select(Quote).where(Quote.movie_id == movie_id).order_by(Quote.quote_index)
+            )
+        )
+        .scalars()
+        .all()
     )
     return [{"quote_text": q.quote_text, "attributed_to": q.attributed_to} for q in quotes]
 

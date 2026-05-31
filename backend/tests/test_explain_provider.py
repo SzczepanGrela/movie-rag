@@ -51,10 +51,12 @@ async def test_run_turn_assembles_content(monkeypatch: pytest.MonkeyPatch) -> No
 
 async def test_run_turn_assembles_tool_calls(monkeypatch: pytest.MonkeyPatch) -> None:
     provider = GroqProvider(api_key="x", model="m", base_url="http://local")
-    stream = _FakeStream([
-        _chunk(tool_calls=[_tc_fragment(0, "call_1", "search_movies", '{"semantic_')]),
-        _chunk(tool_calls=[_tc_fragment(0, None, None, 'query": "plane"}')]),
-    ])
+    stream = _FakeStream(
+        [
+            _chunk(tool_calls=[_tc_fragment(0, "call_1", "search_movies", '{"semantic_')]),
+            _chunk(tool_calls=[_tc_fragment(0, None, None, 'query": "plane"}')]),
+        ]
+    )
 
     async def fake_create(**kwargs: Any) -> Any:
         return stream

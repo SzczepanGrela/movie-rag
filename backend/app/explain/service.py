@@ -41,9 +41,7 @@ def _initial_messages(query: str) -> list[dict[str, Any]]:
     ]
 
 
-def _assistant_tool_calls_message(
-    tool_calls: list[ToolCall], content: str
-) -> dict[str, Any]:
+def _assistant_tool_calls_message(tool_calls: list[ToolCall], content: str) -> dict[str, Any]:
     return {
         "role": "assistant",
         "content": content or None,
