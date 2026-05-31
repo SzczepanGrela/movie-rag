@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createRoute, Link } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import { Search, Sparkles } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { MovieRagLogo } from "@/components/MovieRagLogo";
 import { Poster } from "@/components/Poster";
@@ -70,6 +70,16 @@ export function SearchPage() {
             Search
           </Button>
         </form>
+
+        <div className="mb-8 text-center">
+          <Link
+            to="/ask"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Sparkles className="size-4" />
+            Ask AI instead
+          </Link>
+        </div>
 
         {showSkeleton && (
           <div className="space-y-3">
