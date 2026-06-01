@@ -1,6 +1,7 @@
 import { createRoute, Link } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 import { type FormEvent, useRef, useState } from "react";
+import { Turnstile, type TurnstileHandle } from "@/components/Turnstile";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,6 +23,8 @@ export function AskPage() {
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle | null>(null);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -54,6 +57,7 @@ export function AskPage() {
           onDone: () => {},
         },
         ctrl.signal,
+        turnstileToken,
       );
     } catch (err) {
       if ((err as Error).name !== "AbortError" && abortRef.current === ctrl) {
@@ -61,6 +65,7 @@ export function AskPage() {
       }
     } finally {
       if (abortRef.current === ctrl) setRunning(false);
+      turnstileRef.current?.reset();
     }
   }
 
@@ -100,6 +105,8 @@ export function AskPage() {
             {running ? "Thinking…" : "Ask"}
           </Button>
         </form>
+
+        <Turnstile ref={turnstileRef} onToken={setTurnstileToken} />
 
         {toolCalls.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-2">
