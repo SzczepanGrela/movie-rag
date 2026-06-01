@@ -132,3 +132,94 @@ async def test_explain_stream_rate_limited() -> None:
         )
     )
     assert '"code": "rate_limited"' in out
+
+
+class _FlakyProvider:
+    """Fails the first `fail_times` run_turn calls, then plays `script` turn by turn."""
+
+    def __init__(self, fail_times: int, script: list[list[TurnEvent]]) -> None:
+        self._remaining_fails = fail_times
+        self._script = script
+        self._turn = 0
+
+    async def run_turn(
+        self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]
+    ) -> AsyncIterator[TurnEvent]:
+        if self._remaining_fails > 0:
+            self._remaining_fails -= 1
+            raise ProviderError("tool_use_failed")
+            yield  # pragma: no cover  (makes this an async generator)
+        turn = self._script[self._turn]
+        self._turn += 1
+        for ev in turn:
+            yield ev
+
+
+class _EmitThenFailProvider:
+    async def run_turn(
+        self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]
+    ) -> AsyncIterator[TurnEvent]:
+        yield ContentDelta("partial ")
+        raise ProviderError("boom")
+
+
+def test_config_explain_max_retries_default() -> None:
+    from app.config import settings
+
+    assert settings.explain_max_retries == 2
+
+
+async def test_explain_stream_retries_then_succeeds() -> None:
+    # first run_turn fails (tool_use_failed), retry succeeds: tool turn then answer
+    script: list[list[TurnEvent]] = [
+        [
+            ToolCallsReady(
+                [ToolCall(id="c1", name="search_movies", arguments={"semantic_query": "x"})]
+            )
+        ],
+        [ContentDelta("Answer: "), ContentDelta("Con Air.")],
+    ]
+    out = await _collect(
+        service.explain_stream(
+            cast(AsyncSession, None),
+            cast(Embedder, None),
+            _FlakyProvider(1, script),
+            "x",
+            dispatch=_fake_dispatch,
+            max_retries=2,
+        )
+    )
+    assert "Con Air" in out
+    assert "event: done" in out
+    assert '"code"' not in out  # no error event
+
+
+async def test_explain_stream_retries_exhausted() -> None:
+    # provider always fails; retries exhausted -> provider_error
+    out = await _collect(
+        service.explain_stream(
+            cast(AsyncSession, None),
+            cast(Embedder, None),
+            _FlakyProvider(5, []),
+            "x",
+            dispatch=_fake_dispatch,
+            max_retries=2,
+        )
+    )
+    assert '"code": "provider_error"' in out
+
+
+async def test_explain_stream_no_retry_after_emit() -> None:
+    # turn emits a chunk then fails -> must NOT retry (no duplicate "partial"), provider_error
+    out = await _collect(
+        service.explain_stream(
+            cast(AsyncSession, None),
+            cast(Embedder, None),
+            _EmitThenFailProvider(),
+            "x",
+            dispatch=_fake_dispatch,
+            max_retries=2,
+        )
+    )
+    assert out.count("partial ") == 1
+    assert '"code": "provider_error"' in out

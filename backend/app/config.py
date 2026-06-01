@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     groq_model: str = "llama-3.3-70b-versatile"
     groq_base_url: str = "https://api.groq.com/openai/v1"
     explain_max_iterations: int = 4
+    explain_max_retries: int = 2
 
     model_config = SettingsConfigDict(
         env_file=_ENV_FILE,

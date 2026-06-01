@@ -14,6 +14,7 @@ from app.explain.provider import (
     ProviderRateLimited,
     ToolCall,
     ToolCallsReady,
+    TurnEvent,
 )
 from app.explain.sse import sse_event
 from app.search.embedder import Embedder
@@ -65,6 +66,31 @@ def _tool_result_message(tool_call_id: str, name: str, result: Any) -> dict[str,
     }
 
 
+async def _run_turn_with_retry(
+    provider: LLMProvider,
+    messages: list[dict[str, Any]],
+    *,
+    max_retries: int,
+) -> AsyncIterator[TurnEvent]:
+    # Groq intermittently rejects its own generated tool call with a transient
+    # tool_use_failed (-> ProviderError); re-running the same turn usually succeeds.
+    # Only retry when nothing was emitted yet, so streamed tokens are never duplicated.
+    attempt = 0
+    while True:
+        emitted = False
+        try:
+            async for ev in provider.run_turn(messages, tools_module.TOOL_SCHEMAS):
+                emitted = True
+                yield ev
+            return
+        except ProviderRateLimited:
+            raise
+        except ProviderError:
+            if emitted or attempt >= max_retries:
+                raise
+            attempt += 1
+
+
 async def explain_stream(
     session: AsyncSession,
     embedder: Embedder,
@@ -73,8 +99,10 @@ async def explain_stream(
     *,
     dispatch: DispatchFn = tools_module.dispatch,
     max_iterations: int | None = None,
+    max_retries: int | None = None,
 ) -> AsyncIterator[str]:
     limit = max_iterations or settings.explain_max_iterations
+    retries = settings.explain_max_retries if max_retries is None else max_retries
     messages = _initial_messages(query)
     cited: dict[int, dict[str, Any]] = {}
     t0 = perf_counter()
@@ -83,7 +111,7 @@ async def explain_stream(
         for iteration in range(1, limit + 1):
             turn_tool_calls: list[ToolCall] = []
             content = ""
-            async for ev in provider.run_turn(messages, tools_module.TOOL_SCHEMAS):
+            async for ev in _run_turn_with_retry(provider, messages, max_retries=retries):
                 if isinstance(ev, ContentDelta):
                     content += ev.text
                     yield sse_event("chunk", {"text": ev.text})
