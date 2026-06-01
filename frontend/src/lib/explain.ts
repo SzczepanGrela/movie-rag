@@ -46,15 +46,40 @@ export async function explainStream(
   query: string,
   handlers: ExplainHandlers,
   signal?: AbortSignal,
+  turnstileToken?: string | null,
 ): Promise<void> {
   const res = await fetch("/api/explain", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ query, turnstile_token: turnstileToken ?? null }),
     signal,
   });
+  if (res.status === 403) {
+    handlers.onError(
+      "turnstile_failed",
+      "Please verify you're human and retry.",
+    );
+    return;
+  }
+  if (res.status === 429) {
+    handlers.onError("rate_limited", "Too many requests — try again shortly.");
+    return;
+  }
   if (res.status === 503) {
-    handlers.onError("unavailable", "AI explain is not configured.");
+    let detail = "";
+    try {
+      detail = (await res.json()).detail ?? "";
+    } catch {
+      detail = "";
+    }
+    if (detail === "service_busy") {
+      handlers.onError(
+        "service_busy",
+        "The assistant is busy right now — try again later.",
+      );
+    } else {
+      handlers.onError("unavailable", "AI explain is not configured.");
+    }
     return;
   }
   if (!res.ok || !res.body) {
