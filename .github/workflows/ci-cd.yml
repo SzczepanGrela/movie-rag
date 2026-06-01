@@ -132,6 +132,8 @@ jobs:
           push: false
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
+          build-args: |
+            VITE_TURNSTILE_SITE_KEY=${{ vars.TURNSTILE_SITE_KEY }}
 
   build-push:
     name: Build and push image to GHCR
@@ -174,6 +176,8 @@ jobs:
             ${{ env.IMAGE }}-frontend:${{ env.SHORT_SHA }}
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
+          build-args: |
+            VITE_TURNSTILE_SITE_KEY=${{ vars.TURNSTILE_SITE_KEY }}
 
   deploy:
     name: Deploy to VPS
