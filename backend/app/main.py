@@ -6,9 +6,11 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.config import settings
 from app.db import engine
 from app.explain import router as explain_router
 from app.explain.provider import build_provider
+from app.explain.ratelimit import RateLimiter
 from app.routers import movies as movies_router
 from app.routers import search as search_router
 from app.search.embedder import GemmaEmbedder
@@ -18,6 +20,11 @@ from app.search.embedder import GemmaEmbedder
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.embedder = GemmaEmbedder()
     app.state.provider = build_provider()
+    app.state.rate_limiter = RateLimiter(
+        per_ip_limit=settings.explain_rate_per_ip,
+        window_seconds=settings.explain_rate_window_seconds,
+        global_daily_cap=settings.explain_global_daily_cap,
+    )
     yield
 
 
