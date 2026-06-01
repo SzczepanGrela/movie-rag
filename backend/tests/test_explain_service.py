@@ -223,3 +223,14 @@ async def test_explain_stream_no_retry_after_emit() -> None:
     )
     assert out.count("partial ") == 1
     assert '"code": "provider_error"' in out
+
+
+def test_settings_have_m8a_defaults() -> None:
+    from app.config import settings
+
+    assert settings.turnstile_secret is None
+    assert settings.turnstile_verify_url.endswith("/siteverify")
+    assert settings.explain_rate_per_ip == 10
+    assert settings.explain_rate_window_seconds == 3600
+    assert settings.explain_global_daily_cap == 300
+    assert settings.trusted_proxy_hops == 2

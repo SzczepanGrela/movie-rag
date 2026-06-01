@@ -14,6 +14,12 @@ class Settings(BaseSettings):
     groq_base_url: str = "https://api.groq.com/openai/v1"
     explain_max_iterations: int = 4
     explain_max_retries: int = 2
+    turnstile_secret: str | None = None
+    turnstile_verify_url: str = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+    explain_rate_per_ip: int = 10
+    explain_rate_window_seconds: int = 3600
+    explain_global_daily_cap: int = 300
+    trusted_proxy_hops: int = 2
 
     model_config = SettingsConfigDict(
         env_file=_ENV_FILE,
