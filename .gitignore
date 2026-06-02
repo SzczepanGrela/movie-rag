@@ -3,6 +3,7 @@
 **/*.txt
 !README.md
 !docs/roadmap.md
+!frontend/public/robots.txt
 
 
 # Secrets
