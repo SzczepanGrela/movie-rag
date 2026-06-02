@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createRoute, Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import { Footer } from "@/components/Footer";
 import { MovieRagLogo } from "@/components/MovieRagLogo";
 import { Poster } from "@/components/Poster";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ function MovieDetailPage() {
         )}
         {data && <DetailBody movie={data} />}
       </main>
+      <Footer />
     </div>
   );
 }
