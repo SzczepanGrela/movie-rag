@@ -42,10 +42,6 @@ const STACK: StackGroup[] = [
       },
       { label: "Gemini", href: "https://ai.google.dev/" },
       { label: "Groq", href: "https://groq.com/" },
-      {
-        label: "Cloudflare Turnstile",
-        href: "https://www.cloudflare.com/products/turnstile/",
-      },
     ],
   },
   {
@@ -55,6 +51,10 @@ const STACK: StackGroup[] = [
       {
         label: "Cloudflare R2",
         href: "https://www.cloudflare.com/developer-platform/r2/",
+      },
+      {
+        label: "Cloudflare Turnstile",
+        href: "https://www.cloudflare.com/products/turnstile/",
       },
       {
         label: "Nginx Proxy Manager",

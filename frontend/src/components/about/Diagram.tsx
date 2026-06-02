@@ -84,6 +84,8 @@ export function ServingDiagram() {
           <DiagramNode icon={Cpu} label="EmbeddingGemma" sub="768-dim" />
           <Connector />
           <DiagramNode icon={Boxes} label="pgvector" sub="HNSW · cosine" />
+          <Connector />
+          <DiagramNode accent label="Ranked films" sub="results" />
         </div>
         <div>
           <DiagramNode
@@ -100,15 +102,9 @@ export function ServingDiagram() {
           />
           <Connector />
           <DiagramNode label="schema C tools" sub="search · scenes · quotes" />
+          <Connector />
+          <DiagramNode accent label="Streamed answer" sub="SSE · cited" />
         </div>
-      </div>
-      <Connector />
-      <div className="flex">
-        <DiagramNode
-          accent
-          label="Ranked films + streamed answer"
-          sub="results"
-        />
       </div>
     </DiagramFrame>
   );
