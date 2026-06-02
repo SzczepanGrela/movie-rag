@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createRoute, Link } from "@tanstack/react-router";
 import { Search, Sparkles } from "lucide-react";
 import { type FormEvent, useState } from "react";
+import { Footer } from "@/components/Footer";
 import { MovieRagLogo } from "@/components/MovieRagLogo";
 import { Poster } from "@/components/Poster";
 import { Button } from "@/components/ui/button";
@@ -173,6 +174,7 @@ export function SearchPage() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

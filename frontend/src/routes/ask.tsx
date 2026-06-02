@@ -1,6 +1,7 @@
 import { createRoute, Link } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 import { type FormEvent, useRef, useState } from "react";
+import { Footer } from "@/components/Footer";
 import { Turnstile, type TurnstileHandle } from "@/components/Turnstile";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -164,6 +165,7 @@ export function AskPage() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }
