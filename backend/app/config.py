@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     explain_rate_window_seconds: int = 3600
     explain_global_daily_cap: int = 300
     trusted_proxy_hops: int = 2
+    search_candidate_pool: int = 400
+    search_scene_weight: float = 0.9
 
     model_config = SettingsConfigDict(
         env_file=_ENV_FILE,
