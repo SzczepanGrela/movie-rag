@@ -108,3 +108,28 @@ def test_chunk_row_fields() -> None:
     assert row["content"] == "The cat sat on the mat."
     assert row["embedding"] == embedding
     assert row["token_count"] == len(_tokenizer().encode(row["content"], add_special_tokens=False))
+
+
+def test_chunk_row_defaults_kind_plot_no_scene() -> None:
+    row = chunk_row(
+        source_text_id=5, movie_id=42, chunk_index=0, content="x", embedding=[0.0] * 768
+    )
+    assert row["kind"] == "plot"
+    assert row["scene_id"] is None
+    assert row["source_text_id"] == 5
+
+
+def test_chunk_row_scene_kind() -> None:
+    row = chunk_row(
+        movie_id=42, chunk_index=3, content="x", embedding=[0.0] * 768, kind="scene", scene_id=99
+    )
+    assert row["kind"] == "scene"
+    assert row["scene_id"] == 99
+    assert row["source_text_id"] is None
+
+
+def test_source_to_kind() -> None:
+    from lib.chunks import source_to_kind
+
+    assert source_to_kind("wikipedia") == "plot"
+    assert source_to_kind("tmdb_overview") == "overview"

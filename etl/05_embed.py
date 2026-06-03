@@ -6,7 +6,14 @@ from app.models import Chunk, Genre, Movie, SourceText, movie_genres
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from lib.chunks import CHUNK_OVERLAP, CHUNK_SIZE, build_embed_input, chunk_body, chunk_row
+from lib.chunks import (
+    CHUNK_OVERLAP,
+    CHUNK_SIZE,
+    build_embed_input,
+    chunk_body,
+    chunk_row,
+    source_to_kind,
+)
 from lib.config import EtlSettings
 from lib.db import make_engine, make_session_factory
 from lib.embeddings import Embedder, GemmaEmbedder, embed_async
@@ -24,6 +31,7 @@ class ChunkPlan(NamedTuple):
     chunk_index: int
     body: str
     embed_input: str
+    kind: str
 
 
 def parse_args() -> argparse.Namespace:
@@ -68,27 +76,28 @@ async def load_movie_meta(session: AsyncSession, ids: list[int]) -> dict[int, Mo
 
 async def load_source_texts(
     session: AsyncSession, ids: list[int]
-) -> dict[int, list[tuple[int, str]]]:
-    stmt = select(SourceText.id, SourceText.movie_id, SourceText.content).where(
+) -> dict[int, list[tuple[int, str, str]]]:
+    stmt = select(SourceText.id, SourceText.movie_id, SourceText.source, SourceText.content).where(
         SourceText.movie_id.in_(ids)
     )
     result = await session.execute(stmt)
-    grouped: dict[int, list[tuple[int, str]]] = {}
-    for source_text_id, movie_id, content in result.all():
-        grouped.setdefault(movie_id, []).append((source_text_id, content))
+    grouped: dict[int, list[tuple[int, str, str]]] = {}
+    for source_text_id, movie_id, source, content in result.all():
+        grouped.setdefault(movie_id, []).append((source_text_id, source, content))
     return grouped
 
 
 def plan_chunks(
     meta: dict[int, MovieMeta],
-    texts_by_movie: dict[int, list[tuple[int, str]]],
+    texts_by_movie: dict[int, list[tuple[int, str, str]]],
 ) -> list[ChunkPlan]:
     plans: list[ChunkPlan] = []
     for movie_id, source_texts in texts_by_movie.items():
         m = meta.get(movie_id)
         if m is None:
             continue
-        for source_text_id, content in source_texts:
+        for source_text_id, source, content in source_texts:
+            kind = source_to_kind(source)
             bodies = chunk_body(content, size=CHUNK_SIZE, overlap=CHUNK_OVERLAP)
             for chunk_index, (body, _token_count) in enumerate(bodies):
                 plans.append(
@@ -98,6 +107,7 @@ def plan_chunks(
                         chunk_index=chunk_index,
                         body=body,
                         embed_input=build_embed_input(m.title, m.year, body),
+                        kind=kind,
                     )
                 )
     return plans
@@ -124,6 +134,7 @@ async def process_batch(
                 chunk_index=p.chunk_index,
                 content=p.body,
                 embedding=vec,
+                kind=p.kind,
             )
             for p, vec in zip(plans, vectors, strict=True)
         ]

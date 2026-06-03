@@ -6,6 +6,14 @@ TOKENIZER_MODEL = "google/embeddinggemma-300m"
 CHUNK_SIZE = 512
 CHUNK_OVERLAP = 64
 
+# mirrors lib.overview.OVERVIEW_SOURCE; kept local to avoid import cycle
+OVERVIEW_SOURCE = "tmdb_overview"
+
+
+def source_to_kind(source: str) -> str:
+    return "overview" if source == OVERVIEW_SOURCE else "plot"
+
+
 _TOKENIZER: PreTrainedTokenizerBase | None = None
 
 
@@ -49,18 +57,22 @@ def chunk_body(text: str, *, size: int, overlap: int) -> list[tuple[str, int]]:
 
 def chunk_row(
     *,
-    source_text_id: int,
     movie_id: int,
     chunk_index: int,
     content: str,
     embedding: list[float],
+    kind: str = "plot",
+    source_text_id: int | None = None,
+    scene_id: int | None = None,
 ) -> dict[str, Any]:
     token_count = len(_tokenizer().encode(content, add_special_tokens=False))
     return {
         "source_text_id": source_text_id,
         "movie_id": movie_id,
         "chunk_index": chunk_index,
+        "kind": kind,
         "content": content,
         "token_count": token_count,
+        "scene_id": scene_id,
         "embedding": embedding,
     }
