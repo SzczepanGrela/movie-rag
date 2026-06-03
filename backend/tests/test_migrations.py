@@ -38,6 +38,18 @@ EXPECTED_COLUMNS = {
         "char_count",
         "fetched_at",
     },
+    "chunks": {
+        "id",
+        "source_text_id",
+        "movie_id",
+        "chunk_index",
+        "content",
+        "token_count",
+        "embedding",
+        "created_at",
+        "kind",
+        "scene_id",
+    },
 }
 
 

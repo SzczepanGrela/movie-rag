@@ -17,15 +17,21 @@ class Chunk(Base):
     __table_args__ = (UniqueConstraint("source_text_id", "chunk_index"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    source_text_id: Mapped[int] = mapped_column(
-        ForeignKey("source_texts.id", ondelete="CASCADE"), index=True
+    source_text_id: Mapped[int | None] = mapped_column(
+        ForeignKey("source_texts.id", ondelete="CASCADE"), index=True, nullable=True
     )
     movie_id: Mapped[int] = mapped_column(ForeignKey("movies.id", ondelete="CASCADE"), index=True)
     chunk_index: Mapped[int] = mapped_column(Integer)
+    kind: Mapped[str] = mapped_column(Text, server_default="plot")
     content: Mapped[str] = mapped_column(Text)
     token_count: Mapped[int] = mapped_column(Integer)
+    # Indexed via the partial-unique ux_chunks_scene_id (migration); index=True here
+    # would make autogenerate add a redundant plain index.
+    scene_id: Mapped[int | None] = mapped_column(
+        ForeignKey("scenes.id", ondelete="CASCADE"), nullable=True
+    )
     embedding: Mapped[list[float]] = mapped_column(Vector(768))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     movie: Mapped["Movie"] = relationship(back_populates="chunks")
-    source_text: Mapped["SourceText"] = relationship(back_populates="chunks")
+    source_text: Mapped["SourceText | None"] = relationship(back_populates="chunks")
