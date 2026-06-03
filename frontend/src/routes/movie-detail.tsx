@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { createRoute, Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { createRoute, useParams } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Poster } from "@/components/Poster";
+import { SectionHeading } from "@/components/SectionHeading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -45,22 +45,9 @@ function MovieDetailPage() {
   );
 }
 
-function BackLink() {
-  return (
-    <Link
-      to="/"
-      className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground hover:text-primary transition-colors mb-8"
-    >
-      <ArrowLeft className="size-3.5" />
-      Back to search
-    </Link>
-  );
-}
-
 function DetailSkeleton() {
   return (
     <div className="space-y-8">
-      <BackLink />
       <Skeleton className="h-10 w-3/4" />
       <Skeleton className="h-4 w-1/2" />
       <div className="space-y-3">
@@ -79,14 +66,11 @@ function DetailSkeleton() {
 
 function NotFoundCard() {
   return (
-    <>
-      <BackLink />
-      <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          <p className="font-medium">Movie not found.</p>
-        </CardContent>
-      </Card>
-    </>
+    <Card>
+      <CardContent className="py-12 text-center text-muted-foreground">
+        <p className="font-medium">Movie not found.</p>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -98,17 +82,14 @@ function ErrorCard({
   onRetry: () => void;
 }) {
   return (
-    <>
-      <BackLink />
-      <Card className="border-destructive/60 bg-destructive/10">
-        <CardContent className="py-6 space-y-4">
-          <p className="text-destructive font-medium text-sm">{message}</p>
-          <Button onClick={onRetry} variant="outline" size="sm">
-            Retry
-          </Button>
-        </CardContent>
-      </Card>
-    </>
+    <Card className="border-destructive/60 bg-destructive/10">
+      <CardContent className="py-6 space-y-4">
+        <p className="text-destructive font-medium text-sm">{message}</p>
+        <Button onClick={onRetry} variant="outline" size="sm">
+          Retry
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -122,7 +103,6 @@ function DetailBody({ movie }: { movie: MovieDetail }) {
 
   return (
     <article className="space-y-10">
-      <BackLink />
       <Hero movie={movie} />
       {movie.overview && (
         <Section label="Overview">
@@ -245,6 +225,9 @@ function Hero({ movie }: { movie: MovieDetail }) {
             "{movie.tagline}"
           </p>
         )}
+        <p className="font-mono text-[10px] text-muted-foreground/60">
+          #{movie.id}
+        </p>
       </div>
     </header>
   );
@@ -253,9 +236,7 @@ function Hero({ movie }: { movie: MovieDetail }) {
 function Section({ label, children }: { label: string; children: ReactNode }) {
   return (
     <section className="space-y-3">
-      <h2 className="text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground">
-        {label}
-      </h2>
+      <SectionHeading>{label}</SectionHeading>
       {children}
     </section>
   );
