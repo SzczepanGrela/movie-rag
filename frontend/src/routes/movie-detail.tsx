@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { createRoute, Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { Footer } from "@/components/Footer";
-import { MovieRagLogo } from "@/components/MovieRagLogo";
+import type { ReactNode } from "react";
+import { PageShell } from "@/components/PageShell";
 import { Poster } from "@/components/Poster";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,31 +34,14 @@ function MovieDetailPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="mx-auto max-w-3xl px-4 py-12">
-        <PageChrome id={movieId} />
-        {isLoading && <DetailSkeleton />}
-        {isError && error instanceof NotFoundError && <NotFoundCard />}
-        {isError && !(error instanceof NotFoundError) && (
-          <ErrorCard message={error.message} onRetry={() => refetch()} />
-        )}
-        {data && <DetailBody movie={data} />}
-      </main>
-      <Footer />
-    </div>
-  );
-}
-
-function PageChrome({ id }: { id: number }) {
-  return (
-    <div className="mb-8 flex items-center justify-between">
-      <Link to="/" className="inline-flex items-center gap-3">
-        <MovieRagLogo className="text-xl text-foreground" />
-      </Link>
-      <span className="font-mono text-[11px] text-muted-foreground/70">
-        #{id}
-      </span>
-    </div>
+    <PageShell>
+      {isLoading && <DetailSkeleton />}
+      {isError && error instanceof NotFoundError && <NotFoundCard />}
+      {isError && !(error instanceof NotFoundError) && (
+        <ErrorCard message={error.message} onRetry={() => refetch()} />
+      )}
+      {data && <DetailBody movie={data} />}
+    </PageShell>
   );
 }
 
@@ -267,13 +250,7 @@ function Hero({ movie }: { movie: MovieDetail }) {
   );
 }
 
-function Section({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Section({ label, children }: { label: string; children: ReactNode }) {
   return (
     <section className="space-y-3">
       <h2 className="text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground">

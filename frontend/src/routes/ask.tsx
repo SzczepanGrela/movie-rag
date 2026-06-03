@@ -1,7 +1,6 @@
 import { createRoute, Link } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
 import { type FormEvent, useRef, useState } from "react";
-import { Footer } from "@/components/Footer";
+import { PageShell } from "@/components/PageShell";
 import { Turnstile, type TurnstileHandle } from "@/components/Turnstile";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -71,102 +70,86 @@ export function AskPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="mx-auto max-w-3xl px-4 py-16 sm:py-24">
-        <header className="mb-8 flex items-center justify-between">
-          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
-            <Sparkles className="size-5 text-primary" />
-            Ask AI
-          </h1>
-          <Link
-            to="/"
-            className="text-sm text-muted-foreground hover:text-primary"
-          >
-            ← Back to search
-          </Link>
-        </header>
-
-        <form
-          onSubmit={handleSubmit}
-          className="mb-8 flex gap-2 rounded-2xl border border-border bg-card/80 p-2 backdrop-blur-sm focus-within:border-primary/60"
+    <PageShell mainClassName="py-16 sm:py-24">
+      <form
+        onSubmit={handleSubmit}
+        className="mb-8 flex gap-2 rounded-2xl border border-border bg-card/80 p-2 backdrop-blur-sm focus-within:border-primary/60"
+      >
+        <Input
+          type="text"
+          placeholder="What's that movie where a guy jumps from a plane…"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-base"
+          autoFocus
+        />
+        <Button
+          type="submit"
+          disabled={!draft.trim() || running}
+          className="px-5 font-semibold"
         >
-          <Input
-            type="text"
-            placeholder="What's that movie where a guy jumps from a plane…"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-base"
-            autoFocus
-          />
-          <Button
-            type="submit"
-            disabled={!draft.trim() || running}
-            className="px-5 font-semibold"
-          >
-            {running ? "Thinking…" : "Ask"}
-          </Button>
-        </form>
+          {running ? "Thinking…" : "Ask"}
+        </Button>
+      </form>
 
-        <Turnstile ref={turnstileRef} onToken={setTurnstileToken} />
+      <Turnstile ref={turnstileRef} onToken={setTurnstileToken} />
 
-        {toolCalls.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {toolCalls.map(({ call, seq }) => (
-              <span
-                key={seq}
-                className="rounded-full border border-border bg-card/60 px-3 py-1 font-mono text-[11px] text-muted-foreground"
-              >
-                {call.tool}
-              </span>
-            ))}
-          </div>
-        )}
+      {toolCalls.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {toolCalls.map(({ call, seq }) => (
+            <span
+              key={seq}
+              className="rounded-full border border-border bg-card/60 px-3 py-1 font-mono text-[11px] text-muted-foreground"
+            >
+              {call.tool}
+            </span>
+          ))}
+        </div>
+      )}
 
-        {error && (
-          <Card className="mb-4 border-destructive/60 bg-destructive/10">
-            <CardContent className="py-4 text-sm font-medium text-destructive">
-              {error}
-            </CardContent>
-          </Card>
-        )}
+      {error && (
+        <Card className="mb-4 border-destructive/60 bg-destructive/10">
+          <CardContent className="py-4 text-sm font-medium text-destructive">
+            {error}
+          </CardContent>
+        </Card>
+      )}
 
-        {answer && (
-          <Card className="mb-6">
-            <CardContent className="whitespace-pre-wrap py-6 text-sm leading-relaxed text-foreground/90">
-              {answer}
-            </CardContent>
-          </Card>
-        )}
+      {answer && (
+        <Card className="mb-6">
+          <CardContent className="whitespace-pre-wrap py-6 text-sm leading-relaxed text-foreground/90">
+            {answer}
+          </CardContent>
+        </Card>
+      )}
 
-        {cited.length > 0 && (
-          <div className="space-y-2">
-            <p className="px-1 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-              Cited films
-            </p>
-            {cited.map((m) => (
-              <Link
-                key={m.movie_id}
-                to="/movies/$id"
-                params={{ id: String(m.movie_id) }}
-                className="block"
-              >
-                <Card className="transition-colors hover:border-primary/50">
-                  <CardContent className="flex items-baseline justify-between py-3">
-                    <span className="font-semibold">{m.title}</span>
-                    {m.year ? (
-                      <span className="font-mono text-[11px] text-muted-foreground">
-                        {m.year}
-                      </span>
-                    ) : null}
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
-      </main>
-      <Footer />
-    </div>
+      {cited.length > 0 && (
+        <div className="space-y-2">
+          <p className="px-1 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+            Cited films
+          </p>
+          {cited.map((m) => (
+            <Link
+              key={m.movie_id}
+              to="/movies/$id"
+              params={{ id: String(m.movie_id) }}
+              className="block"
+            >
+              <Card className="transition-colors hover:border-primary/50">
+                <CardContent className="flex items-baseline justify-between py-3">
+                  <span className="font-semibold">{m.title}</span>
+                  {m.year ? (
+                    <span className="font-mono text-[11px] text-muted-foreground">
+                      {m.year}
+                    </span>
+                  ) : null}
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
+    </PageShell>
   );
 }
 

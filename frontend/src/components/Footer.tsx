@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
 
 const REPO_URL = "https://github.com/SzczepanGrela/movie-rag";
@@ -8,9 +7,6 @@ export function Footer() {
   return (
     <footer className="mx-auto max-w-3xl px-4 pb-10">
       <div className="flex items-center justify-center gap-5 border-t border-border/60 pt-6 text-xs text-muted-foreground">
-        <Link to="/about" className="hover:text-primary transition-colors">
-          About
-        </Link>
         <a
           href={REPO_URL}
           target="_blank"
