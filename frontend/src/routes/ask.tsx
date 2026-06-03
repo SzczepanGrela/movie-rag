@@ -95,37 +95,37 @@ export function AskPage() {
 
   return (
     <PageShell mainClassName="py-16 sm:py-24">
-      <div className="mb-8 space-y-3 text-center">
+      <header className="mb-10 space-y-5 text-center">
         <div className="flex justify-center">
           <StatusPill dot>Agentic · tool-using LLM</StatusPill>
         </div>
-        <h1 className="flex items-center justify-center gap-2 text-3xl font-bold tracking-tight">
-          <Sparkles className="size-6 text-primary" aria-hidden="true" />
-          Ask AI
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          Ask <span className="text-primary">AI</span>
         </h1>
-        <p className="mx-auto max-w-md text-sm text-muted-foreground">
+        <p className="mx-auto max-w-md text-base text-muted-foreground">
           Describe a scene or detail you remember — the AI reasons over the data
           and names the film, with citations.
         </p>
-      </div>
+      </header>
 
       <form
         onSubmit={handleSubmit}
-        className="mb-8 flex gap-2 rounded-2xl border border-border bg-card/80 p-2 backdrop-blur-sm focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/25"
+        className="mb-10 flex gap-2 rounded-2xl border border-border bg-card/80 p-2 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.6)] backdrop-blur-sm focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/25 transition"
       >
         <Input
           type="text"
           placeholder="What's that movie where a guy jumps from a plane…"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-base"
+          className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-base placeholder:text-muted-foreground/60"
           autoFocus
         />
         <Button
           type="submit"
           disabled={!draft.trim() || running}
-          className="px-5 font-semibold"
+          className="gap-1.5 px-5 font-semibold"
         >
+          <Sparkles className="size-4" aria-hidden="true" />
           {running ? "Thinking…" : "Ask"}
         </Button>
       </form>
