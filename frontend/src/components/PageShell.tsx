@@ -5,23 +5,16 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   children: ReactNode;
-  width?: "default" | "wide";
   mainClassName?: string;
 };
 
-export function PageShell({
-  children,
-  width = "default",
-  mainClassName,
-}: Props) {
-  const maxW = width === "wide" ? "max-w-5xl" : "max-w-3xl";
+export function PageShell({ children, mainClassName }: Props) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <SiteHeader />
       <main
         className={cn(
-          "mx-auto w-full flex-1 px-4 py-12 sm:py-16",
-          maxW,
+          "mx-auto w-full max-w-3xl flex-1 px-4 py-12 sm:py-16",
           mainClassName,
         )}
       >
