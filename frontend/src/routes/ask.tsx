@@ -32,7 +32,6 @@ export function AskPage() {
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileHandle | null>(null);
 
   async function runQuery(q: string) {
@@ -48,6 +47,18 @@ export function AskPage() {
     setCited([]);
     setError(null);
     setRunning(true);
+
+    let token: string | null;
+    try {
+      token = (await turnstileRef.current?.execute()) ?? null;
+    } catch {
+      if (abortRef.current === ctrl) {
+        setError("Verification failed. Please try again.");
+        setRunning(false);
+      }
+      return;
+    }
+
     try {
       await explainStream(
         query,
@@ -66,7 +77,7 @@ export function AskPage() {
           onDone: () => {},
         },
         ctrl.signal,
-        turnstileToken,
+        token,
       );
     } catch (err) {
       if ((err as Error).name !== "AbortError" && abortRef.current === ctrl) {
@@ -74,7 +85,6 @@ export function AskPage() {
       }
     } finally {
       if (abortRef.current === ctrl) setRunning(false);
-      turnstileRef.current?.reset();
     }
   }
 
@@ -120,7 +130,7 @@ export function AskPage() {
         </Button>
       </form>
 
-      <Turnstile ref={turnstileRef} onToken={setTurnstileToken} />
+      <Turnstile ref={turnstileRef} />
 
       {!running && !answer && !error && toolCalls.length === 0 && (
         <div className="mb-6 space-y-3">
