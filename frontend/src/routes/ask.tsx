@@ -101,7 +101,7 @@ export function AskPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="mb-8 flex gap-2 rounded-2xl border border-border bg-card/80 p-2 backdrop-blur-sm focus-within:border-primary/60"
+        className="mb-8 flex gap-2 rounded-2xl border border-border bg-card/80 p-2 backdrop-blur-sm focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/25"
       >
         <Input
           type="text"

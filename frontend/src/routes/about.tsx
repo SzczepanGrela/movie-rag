@@ -106,14 +106,14 @@ export function AboutPage() {
           {METRICS.map((m) => (
             <div
               key={m.label}
-              className="rounded-xl border border-border bg-card/40 px-3 py-4"
+              className="flex flex-col-reverse rounded-xl border border-border bg-card/40 px-3 py-4"
             >
-              <dd className="text-2xl font-bold tracking-tight text-primary">
-                {m.value}
-              </dd>
               <dt className="mt-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                 {m.label}
               </dt>
+              <dd className="text-2xl font-bold tracking-tight text-primary">
+                {m.value}
+              </dd>
             </div>
           ))}
         </dl>

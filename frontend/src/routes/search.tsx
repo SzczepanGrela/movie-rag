@@ -77,7 +77,7 @@ export function SearchPage() {
           disabled={!draft.trim() || isFetching}
           className="gap-1.5 px-5 font-semibold"
         >
-          <Search className="size-4" />
+          <Search className="size-4" aria-hidden="true" />
           Search
         </Button>
       </form>
@@ -87,7 +87,7 @@ export function SearchPage() {
           to="/ask"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
         >
-          <Sparkles className="size-4" />
+          <Sparkles className="size-4" aria-hidden="true" />
           Ask AI instead
         </Link>
       </div>
