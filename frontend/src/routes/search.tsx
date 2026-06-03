@@ -2,15 +2,25 @@ import { useQuery } from "@tanstack/react-query";
 import { createRoute, Link } from "@tanstack/react-router";
 import { Search, Sparkles } from "lucide-react";
 import { type FormEvent, useState } from "react";
-import { MovieRagLogo } from "@/components/MovieRagLogo";
 import { PageShell } from "@/components/PageShell";
 import { Poster } from "@/components/Poster";
+import { StatusPill } from "@/components/StatusPill";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type SearchResponse, searchMovies } from "@/lib/api";
+import { cardHover } from "@/lib/ui";
 import { rootRoute } from "@/routes/__root";
+
+const EXAMPLES = [
+  "samurai honor and revenge",
+  "a heist that goes wrong",
+  "slow-burn sci-fi about memory",
+  "found-footage horror",
+  "a lonely robot finds friendship",
+  "courtroom drama with a twist",
+];
 
 export function SearchPage() {
   const [draft, setDraft] = useState("");
@@ -27,6 +37,11 @@ export function SearchPage() {
     setSubmitted(draft.trim());
   }
 
+  function runExample(q: string) {
+    setDraft(q);
+    setSubmitted(q);
+  }
+
   const showSkeleton = isFetching && !data;
   const hasResults = data && !isFetching && data.results.length > 0;
   const noResults = data && !isFetching && data.results.length === 0;
@@ -34,18 +49,14 @@ export function SearchPage() {
   return (
     <PageShell mainClassName="py-16 sm:py-24">
       <header className="space-y-5 text-center mb-10">
-        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3.5 py-1 text-[11px] font-mono uppercase tracking-[0.12em] text-muted-foreground backdrop-blur-sm">
-          <span
-            className="size-1.5 rounded-full bg-primary"
-            aria-hidden="true"
-          />
-          <span>Semantic search · 4,719 films</span>
+        <div className="flex justify-center">
+          <StatusPill dot>Semantic search · 4,719 films</StatusPill>
         </div>
-        <h1 className="flex justify-center">
-          <MovieRagLogo className="text-5xl sm:text-6xl text-foreground" />
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+          Find a film by its <span className="text-primary">vibe</span>.
         </h1>
         <p className="text-base text-muted-foreground max-w-md mx-auto">
-          Describe a vibe, a plot, a feeling — find the film.
+          Describe a plot, a mood, a half-remembered scene — and find the movie.
         </p>
       </header>
 
@@ -80,6 +91,26 @@ export function SearchPage() {
           Ask AI instead
         </Link>
       </div>
+
+      {!submitted && (
+        <div className="space-y-3">
+          <p className="text-center font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+            Try one of these
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {EXAMPLES.map((q) => (
+              <button
+                key={q}
+                type="button"
+                onClick={() => runExample(q)}
+                className={`rounded-full border border-border bg-card/60 px-3.5 py-1.5 text-sm text-muted-foreground hover:text-primary hover:border-primary/50 ${cardHover}`}
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {showSkeleton && (
         <div className="space-y-3">
