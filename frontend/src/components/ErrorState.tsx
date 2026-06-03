@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Clapperboard } from "lucide-react";
 import { MovieRagLogo } from "@/components/MovieRagLogo";
 import { Button } from "@/components/ui/button";
 
@@ -14,6 +15,11 @@ export function ErrorState({ title, message, action }: Props) {
       <main className="max-w-md text-center space-y-6">
         <div className="flex justify-center">
           <MovieRagLogo className="text-4xl sm:text-5xl text-foreground" />
+        </div>
+        <div className="flex justify-center">
+          <span className="flex size-14 items-center justify-center rounded-2xl border border-border bg-card/60">
+            <Clapperboard className="size-6 text-primary" aria-hidden="true" />
+          </span>
         </div>
         <div className="space-y-2">
           <h1 className="text-xl font-semibold text-foreground">{title}</h1>
