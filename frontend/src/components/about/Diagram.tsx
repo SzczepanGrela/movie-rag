@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  ArrowDown,
   Boxes,
   Brain,
   Cpu,
@@ -12,27 +11,33 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 
+type Role = "source" | "compute" | "store";
+
+const ROLE_BOX: Record<Role, string> = {
+  source: "border-border bg-card/80",
+  compute: "border-primary/60 bg-primary/5",
+  store: "border-primary bg-primary/10",
+};
+const ROLE_ICON: Record<Role, string> = {
+  source: "text-muted-foreground",
+  compute: "text-primary",
+  store: "text-primary",
+};
+
 type NodeProps = {
   icon?: LucideIcon;
   label: string;
   sub?: string;
-  accent?: boolean;
+  kind?: Role;
 };
 
-function DiagramNode({ icon: Icon, label, sub, accent }: NodeProps) {
+function DiagramNode({ icon: Icon, label, sub, kind = "source" }: NodeProps) {
   return (
     <div
-      className={`flex flex-1 flex-col items-center gap-1 rounded-xl border bg-card/80 px-3 py-2.5 text-center backdrop-blur-sm ${
-        accent ? "border-primary/60" : "border-border"
-      }`}
+      className={`flex flex-1 flex-col items-center gap-1 rounded-xl border px-3 py-2.5 text-center backdrop-blur-sm transition-all motion-safe:hover:-translate-y-0.5 ${ROLE_BOX[kind]}`}
     >
       {Icon ? (
-        <Icon
-          className={
-            accent ? "size-4 text-primary" : "size-4 text-muted-foreground"
-          }
-          aria-hidden="true"
-        />
+        <Icon className={`size-4 ${ROLE_ICON[kind]}`} aria-hidden="true" />
       ) : null}
       <span className="text-xs font-semibold leading-tight text-foreground">
         {label}
@@ -46,10 +51,33 @@ function DiagramNode({ icon: Icon, label, sub, accent }: NodeProps) {
   );
 }
 
-function Connector() {
+function Rail() {
+  return <div className="mx-auto h-5 w-px bg-border" aria-hidden="true" />;
+}
+
+function BranchLabel({ children }: { children: ReactNode }) {
   return (
-    <div className="flex justify-center py-1.5" aria-hidden="true">
-      <ArrowDown className="size-4 text-muted-foreground/40" />
+    <p className="mb-2 text-center font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+      {children}
+    </p>
+  );
+}
+
+function LegendItem({ box, label }: { box: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className={`size-2.5 rounded border ${box}`} aria-hidden="true" />
+      {label}
+    </span>
+  );
+}
+
+function Legend() {
+  return (
+    <div className="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+      <LegendItem box={ROLE_BOX.source} label="source" />
+      <LegendItem box={ROLE_BOX.compute} label="compute" />
+      <LegendItem box={ROLE_BOX.store} label="store" />
     </div>
   );
 }
@@ -68,44 +96,58 @@ export function ServingDiagram() {
       <div className="flex">
         <DiagramNode icon={Search} label="User query" />
       </div>
-      <Connector />
+      <Rail />
       <div className="flex">
         <DiagramNode label="React SPA" sub="TanStack" />
       </div>
-      <Connector />
+      <Rail />
       <div className="flex">
         <DiagramNode icon={Server} label="nginx → FastAPI" />
       </div>
-      <Connector />
-      <div className="grid gap-3 sm:grid-cols-2">
+      <Rail />
+      <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <DiagramNode accent label="/api/search" sub="vector · instant" />
-          <Connector />
-          <DiagramNode icon={Cpu} label="EmbeddingGemma" sub="768-dim" />
-          <Connector />
-          <DiagramNode icon={Boxes} label="pgvector" sub="HNSW · cosine" />
-          <Connector />
-          <DiagramNode accent label="Ranked films" sub="results" />
+          <BranchLabel>/api/search · vector</BranchLabel>
+          <DiagramNode kind="compute" label="/api/search" sub="instant" />
+          <Rail />
+          <DiagramNode
+            icon={Cpu}
+            kind="compute"
+            label="EmbeddingGemma"
+            sub="768-dim"
+          />
+          <Rail />
+          <DiagramNode
+            icon={Boxes}
+            kind="store"
+            label="pgvector"
+            sub="HNSW · cosine"
+          />
+          <Rail />
+          <DiagramNode kind="store" label="Ranked films" sub="results" />
         </div>
         <div>
+          <BranchLabel>/api/explain · agentic</BranchLabel>
           <DiagramNode
-            accent
             icon={Sparkles}
+            kind="compute"
             label="/api/explain"
-            sub="agentic · SSE"
+            sub="SSE"
           />
-          <Connector />
+          <Rail />
           <DiagramNode
             icon={Brain}
+            kind="compute"
             label="Groq llama-3.3-70b"
             sub="tool-calling"
           />
-          <Connector />
+          <Rail />
           <DiagramNode label="schema C tools" sub="search · scenes · quotes" />
-          <Connector />
-          <DiagramNode accent label="Streamed answer" sub="SSE · cited" />
+          <Rail />
+          <DiagramNode kind="store" label="Streamed answer" sub="SSE · cited" />
         </div>
       </div>
+      <Legend />
     </DiagramFrame>
   );
 }
@@ -118,35 +160,43 @@ export function EtlDiagram() {
         <DiagramNode icon={Database} label="IMDb" />
         <DiagramNode icon={Database} label="Wikipedia" />
       </div>
-      <Connector />
+      <Rail />
       <div className="flex">
         <DiagramNode label="Raw metadata" />
       </div>
-      <Connector />
-      <div className="grid gap-3 sm:grid-cols-2">
+      <Rail />
+      <div className="grid gap-4 sm:grid-cols-2">
         <div>
+          <BranchLabel>structure · embed</BranchLabel>
           <DiagramNode
-            accent
             icon={Brain}
+            kind="compute"
             label="Gemini"
             sub="schema C · 6 tables"
           />
-          <Connector />
-          <DiagramNode icon={Cpu} label="EmbeddingGemma" sub="768-dim" />
-          <Connector />
+          <Rail />
           <DiagramNode
-            accent
+            icon={Cpu}
+            kind="compute"
+            label="EmbeddingGemma"
+            sub="768-dim"
+          />
+          <Rail />
+          <DiagramNode
             icon={Boxes}
+            kind="store"
             label="pgvector"
             sub="13,556 chunks · HNSW"
           />
         </div>
         <div>
+          <BranchLabel>posters</BranchLabel>
           <DiagramNode icon={ImageIcon} label="Posters" />
-          <Connector />
-          <DiagramNode label="Cloudflare R2" sub="BlurHash LQIP" />
+          <Rail />
+          <DiagramNode kind="store" label="Cloudflare R2" sub="BlurHash LQIP" />
         </div>
       </div>
+      <Legend />
     </DiagramFrame>
   );
 }
