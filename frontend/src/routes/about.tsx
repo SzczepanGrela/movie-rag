@@ -1,14 +1,24 @@
-import { createRoute } from "@tanstack/react-router";
+import { createRoute, Link } from "@tanstack/react-router";
 import { ExternalLink } from "lucide-react";
-import type { ReactNode } from "react";
 import { EtlDiagram, ServingDiagram } from "@/components/about/Diagram";
 import { MovieRagLogo } from "@/components/MovieRagLogo";
 import { PageShell } from "@/components/PageShell";
+import { SectionHeading } from "@/components/SectionHeading";
+import { StatusPill } from "@/components/StatusPill";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { cardHover } from "@/lib/ui";
 import { rootRoute } from "@/routes/__root";
 
 type Tool = { label: string; href: string };
 type StackGroup = { title: string; tools: Tool[] };
+
+const METRICS = [
+  { value: "4,719", label: "films" },
+  { value: "13,556", label: "chunks" },
+  { value: "768", label: "dim" },
+  { value: "2", label: "endpoints" },
+];
 
 const STACK: StackGroup[] = [
   {
@@ -69,41 +79,53 @@ const STACK: StackGroup[] = [
   },
 ];
 
-function Badge({ children }: { children: ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-full border border-border bg-card/60 px-3.5 py-1 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground backdrop-blur-sm">
-      {children}
-    </span>
-  );
-}
-
-function SectionHeading({ children }: { children: ReactNode }) {
-  return (
-    <h2 className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-      {children}
-    </h2>
-  );
-}
-
 export function AboutPage() {
   return (
     <PageShell mainClassName="py-16 sm:py-24">
-      <section className="mb-16 space-y-5 text-center">
-        <h1 className="flex justify-center">
+      <section className="mb-16 space-y-6 text-center">
+        <h1 className="sr-only">About MovieRAG</h1>
+        <div className="relative flex justify-center">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -z-10"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, rgba(245,213,71,0.14), transparent 70%)",
+            }}
+          />
           <MovieRagLogo className="text-5xl sm:text-6xl text-foreground" />
-        </h1>
+        </div>
+        <div className="flex justify-center">
+          <StatusPill dot>Semantic + agentic · 4,719 films</StatusPill>
+        </div>
         <p className="mx-auto max-w-xl text-base text-muted-foreground">
           A semantic search engine over 4,719 films. Describe a vibe, a plot, or
           a feeling — and find the movie, even when you can't recall its name.
         </p>
-        <div className="flex flex-wrap justify-center gap-2">
-          <Badge>4,719 films</Badge>
-          <Badge>semantic + agentic</Badge>
+        <dl className="mx-auto grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
+          {METRICS.map((m) => (
+            <div
+              key={m.label}
+              className="rounded-xl border border-border bg-card/40 px-3 py-4"
+            >
+              <dd className="text-2xl font-bold tracking-tight text-primary">
+                {m.value}
+              </dd>
+              <dt className="mt-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                {m.label}
+              </dt>
+            </div>
+          ))}
+        </dl>
+        <div className="flex justify-center pt-1">
+          <Button asChild size="lg">
+            <Link to="/">Try it live</Link>
+          </Button>
         </div>
       </section>
 
       <section className="mb-16">
-        <SectionHeading>The problem</SectionHeading>
+        <SectionHeading index="01">The problem</SectionHeading>
         <div className="space-y-3 text-sm leading-relaxed text-foreground/80">
           <p>
             Keyword search breaks the moment you don't know the exact words. Ask
@@ -121,7 +143,7 @@ export function AboutPage() {
       </section>
 
       <section className="mb-16">
-        <SectionHeading>How it works · serving</SectionHeading>
+        <SectionHeading index="02">How it works · serving</SectionHeading>
         <p className="mb-6 text-sm leading-relaxed text-foreground/80">
           Two endpoints with different jobs.{" "}
           <code className="font-mono text-primary">/api/search</code> is pure
@@ -134,7 +156,7 @@ export function AboutPage() {
       </section>
 
       <section className="mb-16">
-        <SectionHeading>How it's built · ingestion</SectionHeading>
+        <SectionHeading index="03">How it's built · ingestion</SectionHeading>
         <p className="mb-6 text-sm leading-relaxed text-foreground/80">
           Everything is precomputed offline. Metadata from TMDB, IMDb and
           Wikipedia is structured by an LLM into six tables (plot, scenes,
@@ -146,10 +168,10 @@ export function AboutPage() {
       </section>
 
       <section>
-        <SectionHeading>Tech stack</SectionHeading>
+        <SectionHeading index="04">Tech stack</SectionHeading>
         <div className="grid gap-3 sm:grid-cols-2">
           {STACK.map((group) => (
-            <Card key={group.title}>
+            <Card key={group.title} className={cardHover}>
               <CardContent className="py-4">
                 <p className="mb-2.5 text-sm font-semibold text-foreground">
                   {group.title}
@@ -172,6 +194,24 @@ export function AboutPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      </section>
+
+      <section className="mt-16 rounded-2xl border border-border bg-card/40 px-6 py-10 text-center">
+        <h2 className="text-xl font-semibold tracking-tight">
+          Find your next film
+        </h2>
+        <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+          Search by vibe, or let the AI reason it out from a half-remembered
+          scene.
+        </p>
+        <div className="mt-5 flex justify-center gap-3">
+          <Button asChild>
+            <Link to="/">Search</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/ask">Ask AI</Link>
+          </Button>
         </div>
       </section>
     </PageShell>
