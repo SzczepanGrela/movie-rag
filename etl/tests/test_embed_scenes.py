@@ -5,9 +5,7 @@ mod = importlib.import_module("08_embed_scenes")
 
 def test_plan_scene_chunks_builds_rows() -> None:
     meta = {7: mod.MovieMeta(title="Jurassic Park", year=1993)}
-    scenes_by_movie = {
-        7: [(900, 0, "Kitchen Chase", "Raptors hunt the kids.", "tense", ["Lex"])]
-    }
+    scenes_by_movie = {7: [(900, 0, "Kitchen Chase", "Raptors hunt the kids.", "tense", ["Lex"])]}
     plans = mod.plan_scene_chunks(meta, scenes_by_movie)
     assert len(plans) == 1
     p = plans[0]

@@ -31,8 +31,17 @@ def _scene_weight(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.mark.asyncio
 async def test_dedup_keeps_best_weighted_per_movie() -> None:
     rows = [
-        (1, "chunk A1 (best)", 0.10, "plot", "Inception", 2010, 27205,
-         "/inception.jpg", "LKO2hash"),
+        (
+            1,
+            "chunk A1 (best)",
+            0.10,
+            "plot",
+            "Inception",
+            2010,
+            27205,
+            "/inception.jpg",
+            "LKO2hash",
+        ),
         (1, "chunk A2", 0.30, "plot", "Inception", 2010, 27205, "/inception.jpg", "LKO2hash"),
         (2, "chunk B1", 0.20, "plot", "Matrix", 1999, 603, None, None),
     ]
@@ -42,7 +51,9 @@ async def test_dedup_keeps_best_weighted_per_movie() -> None:
     assert response.results[0].best_chunk.text == "chunk A1 (best)"
     assert response.total_candidates == 3
     assert response.results[0].poster is not None
-    assert response.results[0].poster.url == "https://movierag-assets.grela.dev/posters/w500/27205.jpg"
+    assert (
+        response.results[0].poster.url == "https://movierag-assets.grela.dev/posters/w500/27205.jpg"
+    )
     assert response.results[1].poster is None
 
 

@@ -153,9 +153,7 @@ async def main() -> None:
             total_chunks = 0
             for offset in range(0, len(ids), args.batch_size):
                 batch_ids = ids[offset : offset + args.batch_size]
-                movies, chunks = await process_batch(
-                    session, embedder, batch_ids, force=args.force
-                )
+                movies, chunks = await process_batch(session, embedder, batch_ids, force=args.force)
                 total_movies += movies
                 total_chunks += chunks
                 print(
