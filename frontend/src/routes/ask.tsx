@@ -1,5 +1,5 @@
 import { createRoute, Link } from "@tanstack/react-router";
-import { Sparkles } from "lucide-react";
+import { Clock, Sparkles } from "lucide-react";
 import { type FormEvent, useRef, useState } from "react";
 import { PageShell } from "@/components/PageShell";
 import { StatusPill } from "@/components/StatusPill";
@@ -16,9 +16,10 @@ import { cardHover } from "@/lib/ui";
 import { rootRoute } from "@/routes/__root";
 
 const PROMPTS = [
-  "What's that movie where a guy jumps from a plane without a parachute?",
-  "A sci-fi film about dreams within dreams",
-  "The one where a chess prodigy struggles with addiction",
+  "What's that movie where a man with no short-term memory hunts his wife's killer using tattoos?",
+  "An astronaut stranded alone on Mars who grows potatoes to survive",
+  "Dinosaurs are cloned for a theme park that goes horribly wrong",
+  "The animated one where a clownfish dad crosses the ocean to find his son",
 ];
 
 export function AskPage() {
@@ -114,7 +115,7 @@ export function AskPage() {
       >
         <Input
           type="text"
-          placeholder="What's that movie where a guy jumps from a plane…"
+          placeholder="A man hunts his wife's killer using tattoos…"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-base placeholder:text-muted-foreground/60"
@@ -131,6 +132,21 @@ export function AskPage() {
       </form>
 
       <Turnstile ref={turnstileRef} />
+
+      {running && !answer && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-border bg-card/40 px-4 py-3 text-sm text-muted-foreground">
+          <Clock
+            className="mt-0.5 size-4 shrink-0 text-primary"
+            aria-hidden="true"
+          />
+          <span>
+            This usually takes{" "}
+            <span className="font-medium text-foreground">10–15s</span>.
+            MovieRAG runs its semantic model on a CPU-only server (no GPU), so
+            the AI runs a few searches before answering.
+          </span>
+        </div>
+      )}
 
       {!running && !answer && !error && toolCalls.length === 0 && (
         <div className="mb-6 space-y-3">
