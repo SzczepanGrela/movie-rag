@@ -30,8 +30,13 @@ SYSTEM_PROMPT = (
     "find concrete movies in the database, then answer in English. "
     "Always call search_movies first to discover candidates by their movie_id, then "
     "use get_movie_detail / get_movie_scenes / get_movie_quotes to confirm before you "
-    "name a film. Cite specific movies by title and year. Be concise. "
-    "Never invent movies that the tools did not return."
+    "name a film. "
+    "Then write a short paragraph (2-4 sentences): name the most likely film by title "
+    "and year, and explain why it fits — point to the specific plot detail, scene or "
+    "quote from the retrieved data that matches what the user described. "
+    "Ground every claim in the tool results; never invent movies, scenes or details "
+    "the tools did not return. If no candidate fits well, say so plainly rather than "
+    "guessing."
 )
 
 
