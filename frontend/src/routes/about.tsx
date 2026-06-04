@@ -147,10 +147,13 @@ export function AboutPage() {
         <p className="mb-6 text-sm leading-relaxed text-foreground/80">
           Two endpoints with different jobs.{" "}
           <code className="font-mono text-primary">/api/search</code> is pure
-          vector similarity: instant, deterministic, no LLM.{" "}
+          vector similarity: instant, deterministic, no LLM — reach for it to
+          browse films that match a vibe, a plot, or a single scene.{" "}
           <code className="font-mono text-primary">/api/explain</code> is
           agentic: an LLM parses intent, calls retrieval tools over structured
-          data, and streams a cited answer token by token.
+          data, and streams a cited answer token by token — reach for it when
+          you want one film reasoned out and named from a description you can't
+          quite place.
         </p>
         <ServingDiagram />
       </section>

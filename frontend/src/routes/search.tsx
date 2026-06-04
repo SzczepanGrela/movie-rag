@@ -14,12 +14,12 @@ import { cardHover } from "@/lib/ui";
 import { rootRoute } from "@/routes/__root";
 
 const EXAMPLES = [
-  "samurai honor and revenge",
-  "a heist that goes wrong",
-  "slow-burn sci-fi about memory",
-  "found-footage horror",
   "a lonely robot finds friendship",
-  "courtroom drama with a twist",
+  "slow-burn sci-fi about memory and loss",
+  "children hide from raptors in a kitchen",
+  "a music teacher throws a chair at his drummer",
+  "a heist that goes wrong",
+  "found-footage horror",
 ];
 
 export function SearchPage() {
@@ -66,7 +66,7 @@ export function SearchPage() {
       >
         <Input
           type="text"
-          placeholder="samurai honor and revenge…"
+          placeholder="a lonely robot finds friendship…"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           className="border-0 shadow-none focus-visible:ring-0 text-base bg-transparent placeholder:text-muted-foreground/60"

@@ -16,10 +16,9 @@ import { cardHover } from "@/lib/ui";
 import { rootRoute } from "@/routes/__root";
 
 const PROMPTS = [
-  "What's that movie where a man with no short-term memory hunts his wife's killer using tattoos?",
-  "An astronaut stranded alone on Mars who grows potatoes to survive",
-  "Dinosaurs are cloned for a theme park that goes horribly wrong",
-  "The animated one where a clownfish dad crosses the ocean to find his son",
+  "What's the movie where a man relives the same day over and over?",
+  "A thief who enters people's dreams to steal secrets — what's the film?",
+  "What's that film with a lighthouse keeper and his assistant going mad?",
 ];
 
 export function AskPage() {
@@ -104,8 +103,8 @@ export function AskPage() {
           Ask <span className="text-primary">AI</span>
         </h1>
         <p className="mx-auto max-w-md text-base text-muted-foreground">
-          Describe a scene or detail you remember — the AI reasons over the data
-          and names the film, with citations.
+          Can't quite place a film? Ask in plain words — the AI reasons over the
+          data, names it, and cites its sources.
         </p>
       </header>
 
@@ -115,7 +114,7 @@ export function AskPage() {
       >
         <Input
           type="text"
-          placeholder="A man hunts his wife's killer using tattoos…"
+          placeholder="What's that movie where…"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-base placeholder:text-muted-foreground/60"
