@@ -57,15 +57,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
             "description": "All scenes of one movie (index, title, description, mood, characters).",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "movie_id": {"type": "integer"},
-                    "query": {
-                        "type": "string",
-                        "description": (
-                            "Keyword or theme to focus on (reserved for future filtering)."
-                        ),
-                    },
-                },
+                "properties": {"movie_id": {"type": "integer"}},
                 "required": ["movie_id"],
             },
         },
@@ -77,15 +69,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
             "description": "All quotes of one movie (quote text and who said it).",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "movie_id": {"type": "integer"},
-                    "query": {
-                        "type": "string",
-                        "description": (
-                            "Keyword or theme to focus on (reserved for future filtering)."
-                        ),
-                    },
-                },
+                "properties": {"movie_id": {"type": "integer"}},
                 "required": ["movie_id"],
             },
         },
