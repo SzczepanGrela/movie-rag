@@ -37,8 +37,10 @@ async def test_dispatch_search_movies(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 async def test_dispatch_get_movie_detail_marks_cited(monkeypatch: pytest.MonkeyPatch) -> None:
-    async def fake_brief(session: Any, movie_id: int) -> tuple[str, int | None] | None:
-        return ("Con Air", 1997)
+    async def fake_brief(
+        session: Any, movie_id: int
+    ) -> tuple[str, int | None, int, str | None, str | None] | None:
+        return ("Con Air", 1997, 1701, "/con.jpg", "LKO2hash")
 
     async def fake_detail(session: Any, movie_id: int) -> dict[str, Any]:
         return {"id": movie_id, "title": "Con Air", "scenes": []}
@@ -50,7 +52,12 @@ async def test_dispatch_get_movie_detail_marks_cited(monkeypatch: pytest.MonkeyP
         cast(AsyncSession, None), _FakeEmbedder(), "get_movie_detail", {"movie_id": 123}, cited
     )
     assert result["title"] == "Con Air"
-    assert cited == {123: {"movie_id": 123, "title": "Con Air", "year": 1997}}
+    entry = cited[123]
+    assert entry["movie_id"] == 123
+    assert entry["title"] == "Con Air"
+    assert entry["year"] == 1997
+    assert entry["poster"]["thumb_url"].endswith("/posters/w154/1701.jpg")
+    assert entry["poster"]["blurhash"] == "LKO2hash"
 
 
 async def test_dispatch_missing_movie_returns_error(monkeypatch: pytest.MonkeyPatch) -> None:

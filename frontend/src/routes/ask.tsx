@@ -2,6 +2,7 @@ import { createRoute, Link } from "@tanstack/react-router";
 import { Clock, Sparkles } from "lucide-react";
 import { type FormEvent, useRef, useState } from "react";
 import { PageShell } from "@/components/PageShell";
+import { Poster } from "@/components/Poster";
 import { StatusPill } from "@/components/StatusPill";
 import { Turnstile, type TurnstileHandle } from "@/components/Turnstile";
 import { Button } from "@/components/ui/button";
@@ -215,8 +216,14 @@ export function AskPage() {
               className="block"
             >
               <Card className={cardHover}>
-                <CardContent className="flex items-baseline justify-between py-3">
-                  <span className="font-semibold">{m.title}</span>
+                <CardContent className="flex items-center gap-3 py-3">
+                  <Poster
+                    poster={m.poster}
+                    size="thumb"
+                    alt={`${m.title} poster`}
+                    className="w-10 shrink-0"
+                  />
+                  <span className="flex-1 font-semibold">{m.title}</span>
                   {m.year ? (
                     <span className="font-mono text-[11px] text-muted-foreground">
                       {m.year}

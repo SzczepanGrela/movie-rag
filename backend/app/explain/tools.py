@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Movie, Quote, Scene
 from app.movies import service as movies_service
+from app.posters import build_poster
 from app.search import service as search_service
 from app.search.embedder import Embedder
 
@@ -108,13 +109,19 @@ async def run_search_movies(
     ]
 
 
-async def movie_brief(session: AsyncSession, movie_id: int) -> tuple[str, int | None] | None:
+async def movie_brief(
+    session: AsyncSession, movie_id: int
+) -> tuple[str, int | None, int, str | None, str | None] | None:
     row = (
-        await session.execute(select(Movie.title, Movie.year).where(Movie.id == movie_id))
+        await session.execute(
+            select(Movie.title, Movie.year, Movie.tmdb_id, Movie.poster_path, Movie.blurhash).where(
+                Movie.id == movie_id
+            )
+        )
     ).first()
     if row is None:
         return None
-    return (row[0], row[1])
+    return (row[0], row[1], row[2], row[3], row[4])
 
 
 async def run_get_movie_detail(session: AsyncSession, movie_id: int) -> dict[str, Any]:
@@ -173,7 +180,14 @@ async def dispatch(
     brief = await movie_brief(session, movie_id)
     if brief is None:
         return {"error": "movie_not_found", "movie_id": movie_id}
-    cited[movie_id] = {"movie_id": movie_id, "title": brief[0], "year": brief[1]}
+    title, year, tmdb_id, poster_path, blurhash = brief
+    poster = build_poster(tmdb_id, poster_path, blurhash)
+    cited[movie_id] = {
+        "movie_id": movie_id,
+        "title": title,
+        "year": year,
+        "poster": poster.model_dump(mode="json") if poster else None,
+    }
 
     if name == "get_movie_detail":
         return await run_get_movie_detail(session, movie_id)

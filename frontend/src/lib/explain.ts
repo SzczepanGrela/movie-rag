@@ -1,8 +1,11 @@
+import type { PosterData } from "@/lib/api";
+
 export type ExplainToolCall = { tool: string; args: Record<string, unknown> };
 export type CitedMovie = {
   movie_id: number;
   title: string;
   year: number | null;
+  poster: PosterData | null;
 };
 export type ExplainDone = { took_ms: number; iterations: number };
 
