@@ -1,0 +1,24 @@
+- {type: plot, expect: 32,   query: "a thief who steals secrets by entering people's dreams"}            # Inception
+- {type: plot, expect: 35,   query: "a hacker discovers his reality is a computer simulation"}            # The Matrix
+- {type: plot, expect: 401,  query: "an astronaut stranded alone on Mars who grows food to survive"}      # The Martian
+- {type: plot, expect: 350,  query: "a clownfish father searches the ocean for his lost son"}             # Finding Nemo
+- {type: plot, expect: 1118, query: "dinosaurs are cloned for a theme park that goes wrong"}              # Jurassic Park
+- {type: plot, expect: 384,  query: "a man with no short-term memory hunts his wife's killer using tattoos"}  # Memento
+- {type: plot, expect: 327,  query: "a young lion prince flees after his father is killed by his uncle"}   # The Lion King
+- {type: plot, expect: 66,   query: "a slow-witted but kind man witnesses decades of American history"}   # Forrest Gump
+- {type: plot, expect: 19,   query: "a banker wrongly imprisoned slowly plans his escape over years"}     # The Shawshank Redemption
+- {type: plot, expect: 2105, query: "an FBI trainee consults an imprisoned cannibal to catch a killer"}   # The Silence of the Lambs
+- {type: plot, expect: 50,   query: "a romance aboard a doomed ocean liner that strikes an iceberg"}      # Titanic
+- {type: plot, expect: 342,  query: "a betrayed Roman general becomes a slave who fights in the arena"}   # Gladiator
+- {type: scene, expect: 1118, query: "children hide from velociraptors in a stainless steel kitchen"}     # Jurassic Park
+- {type: scene, expect: 32,   query: "a spinning top that may never stop spinning"}                       # Inception
+- {type: scene, expect: 39,   query: "two people dance in a twist contest at a retro diner"}              # Pulp Fiction
+- {type: scene, expect: 33,   query: "a little girl in a red coat walks through a ghetto being liquidated"}  # Schindler's List
+- {type: scene, expect: 35,   query: "a man is offered a choice between a red pill and a blue pill"}       # The Matrix
+- {type: scene, expect: 66,   query: "a man tells his life story to strangers at a bus stop bench"}        # Forrest Gump
+- {type: scene, expect: 19,   query: "a prisoner escapes by crawling through a sewage pipe in a thunderstorm"}  # The Shawshank Redemption
+- {type: scene, expect: 25,   query: "a man wakes up to find a severed horse head in his bed"}            # The Godfather
+- {type: scene, expect: 381,  query: "a man smashes through a bathroom door with an axe"}                 # The Shining
+- {type: scene, expect: 50,   query: "a man sketches a portrait of a woman wearing only a necklace"}      # Titanic
+- {type: scene, expect: 342,  query: "a gladiator shouts at the crowd asking if they are entertained"}    # Gladiator
+- {type: scene, expect: 314,  query: "a music teacher hurls a chair at a drummer for losing the tempo"}   # Whiplash
