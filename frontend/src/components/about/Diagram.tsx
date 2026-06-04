@@ -186,7 +186,7 @@ export function EtlDiagram() {
             icon={Boxes}
             kind="store"
             label="pgvector"
-            sub="13,556 chunks · HNSW"
+            sub="118,730 vectors · HNSW"
           />
         </div>
         <div>

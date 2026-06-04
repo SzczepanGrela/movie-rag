@@ -15,7 +15,7 @@ type StackGroup = { title: string; tools: Tool[] };
 
 const METRICS = [
   { value: "4,719", label: "films" },
-  { value: "13,556", label: "chunks" },
+  { value: "118,730", label: "vectors" },
   { value: "768", label: "dim" },
   { value: "2", label: "endpoints" },
 ];
@@ -158,10 +158,13 @@ export function AboutPage() {
       <section className="mb-16">
         <SectionHeading index="03">How it's built · ingestion</SectionHeading>
         <p className="mb-6 text-sm leading-relaxed text-foreground/80">
-          Everything is precomputed offline. Metadata from TMDB, IMDb and
-          Wikipedia is structured by an LLM into six tables (plot, scenes,
-          themes, atmosphere, quotes, characters), embedded with EmbeddingGemma,
-          and stored in pgvector. Posters go to Cloudflare R2 with BlurHash
+          Everything is precomputed offline. An LLM (Gemini) reads the raw
+          metadata from TMDB, IMDb and Wikipedia and structures it into six
+          tables — plot, scenes, themes, atmosphere, quotes and characters. The
+          plot, the overview and every individual scene are embedded with
+          EmbeddingGemma into pgvector, so a film can be matched by its whole
+          story or by a single remembered scene; the remaining tables feed the
+          agent's retrieval tools. Posters go to Cloudflare R2 with BlurHash
           placeholders.
         </p>
         <EtlDiagram />
