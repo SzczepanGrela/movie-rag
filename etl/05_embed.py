@@ -142,7 +142,10 @@ async def process_batch(
         rows = []
 
     if force:
-        await session.execute(delete(Chunk).where(Chunk.movie_id.in_(batch_ids)))
+        # Re-embed source-text chunks only; scene chunks are owned by 08_embed_scenes.py.
+        await session.execute(
+            delete(Chunk).where(Chunk.movie_id.in_(batch_ids) & (Chunk.kind != "scene"))
+        )
     if rows:
         await session.execute(insert(Chunk).values(rows))
     await session.execute(
